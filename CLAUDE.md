@@ -1,0 +1,1 @@
+- 최대한 useMemo와 useCallback을 사용해야 함

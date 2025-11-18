@@ -1,98 +1,151 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import {
+  ScrollView,
+  StyleSheet,
+  View,
+  Text,
+  useWindowDimensions,
+  NativeScrollEvent,
+  NativeSyntheticEvent,
+  TouchableOpacity,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { Sizing } from "@/constants/theme";
+import { useThemeColor } from "@/hooks/use-theme-color";
+import { useCallback, useMemo, useState } from "react";
+import BasicEventItem from "@/components/basic-event-item";
+import { router } from "expo-router";
 
-import { HelloWave } from '@/components/hello-wave';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Link } from 'expo-router';
+type SectionProps = {
+  title: string;
+  itemCount: number;
+};
 
-export default function HomeScreen() {
+function Section(props: SectionProps) {
+  const themeText = useThemeColor({}, "text");
+  const themeTint = useThemeColor({}, "tint");
+  const { width } = useWindowDimensions();
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  const itemWidth = useMemo(
+    () => width - Sizing.horizontalScreenPadding * 2 - 40,
+    [width],
+  );
+
+  const snapInterval = useMemo(
+    () => itemWidth + Sizing.horizontalScreenPadding,
+    [itemWidth],
+  );
+
+  const handleScroll = useCallback(
+    (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+      const offsetX = event.nativeEvent.contentOffset.x;
+      const index = Math.round(offsetX / snapInterval);
+      setCurrentIndex(index);
+    },
+    [snapInterval],
+  );
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <Link href="/modal">
-          <Link.Trigger>
-            <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-          </Link.Trigger>
-          <Link.Preview />
-          <Link.Menu>
-            <Link.MenuAction title="Action" icon="cube" onPress={() => alert('Action pressed')} />
-            <Link.MenuAction
-              title="Share"
-              icon="square.and.arrow.up"
-              onPress={() => alert('Share pressed')}
-            />
-            <Link.Menu title="More" icon="ellipsis">
-              <Link.MenuAction
-                title="Delete"
-                icon="trash"
-                destructive
-                onPress={() => alert('Delete pressed')}
-              />
-            </Link.Menu>
-          </Link.Menu>
-        </Link>
+    <View>
+      <Text style={[sectionStyles.titleText, { color: themeText }]}>
+        {props.title}
+      </Text>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        snapToInterval={snapInterval}
+        decelerationRate="fast"
+        onScroll={handleScroll}
+        scrollEventThrottle={16}
+        style={sectionStyles.carouselView}
+        contentContainerStyle={{
+          paddingHorizontal: Sizing.horizontalScreenPadding,
+          gap: Sizing.horizontalScreenPadding,
+        }}
+      >
+        {Array.from({ length: props.itemCount }).map((_, index) => (
+          <TouchableOpacity
+            key={index}
+            activeOpacity={0.6}
+            onPress={() => router.push("/event-detail")}
+            style={{ width: itemWidth }}
+          >
+            <BasicEventItem />
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
+      <Text style={[sectionStyles.indicatorText, { color: themeTint }]}>
+        {currentIndex + 1} / {props.itemCount}
+      </Text>
+    </View>
+  );
+}
 
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+const sectionStyles = StyleSheet.create({
+  titleText: {
+    paddingHorizontal: Sizing.horizontalScreenPadding + 6,
+    fontSize: 20,
+    fontWeight: "bold",
+    marginBottom: 8,
+  },
+
+  carouselView: {
+    marginBottom: 6,
+  },
+
+  indicatorText: {
+    paddingHorizontal: Sizing.horizontalScreenPadding + 6,
+    fontSize: 12,
+    opacity: 0.6,
+    fontWeight: "bold",
+  },
+});
+
+export default function RecommendScreen() {
+  const themeBackground = useThemeColor({}, "background");
+  const themeText = useThemeColor({}, "text");
+
+  return (
+    <View style={[styles.container, { backgroundColor: themeBackground }]}>
+      <SafeAreaView
+        style={[styles.navigationBar, { backgroundColor: themeBackground }]}
+        edges={["top"]}
+      >
+        <Text style={[styles.logoText, { color: themeText }]}>OSSO</Text>
+      </SafeAreaView>
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollViewContent}
+      >
+        <Section title="{닉네임}을 위한 맞춤 프로그램" itemCount={3} />
+        <Section title="진행 중인 행사 및 축제" itemCount={4} />
+        <Section title="새로 등록된 프로그램" itemCount={2} />
+      </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+  container: {
+    flex: 1,
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
+
+  navigationBar: {
+    paddingHorizontal: Sizing.horizontalScreenPadding,
+    paddingVertical: 36,
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+
+  logoText: {
+    fontSize: 18,
+  },
+
+  scrollView: {
+    flex: 1,
+  },
+
+  scrollViewContent: {
+    paddingTop: 20,
+    paddingBottom: 56,
+    gap: 50,
   },
 });
