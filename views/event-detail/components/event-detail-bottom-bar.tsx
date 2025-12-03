@@ -1,4 +1,4 @@
-import { View, StyleSheet, Linking, Alert, Text } from "react-native";
+import { View, StyleSheet, Linking, Alert } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Color, Sizing, SizingScale } from "@/constants/theme";
 import { Phone, ExternalLink, Heart } from "lucide-react-native";
@@ -7,19 +7,11 @@ import { useEventDetailScreenView } from "@/views/event-detail/context/use-event
 import * as WebBrowser from "expo-web-browser";
 import Button from "@/components/ui/button";
 import Tooltip from "@/components/ui/tooltip";
+import { useFavorite } from "@/views/event-detail/context/use-favorite";
 
 export function EventDetailBottomBar() {
-  const { eventDetail, registrationStatus, toggleFavorite } =
-    useEventDetailScreenView();
-
-  const handleToggleFavorite = useCallback(async () => {
-    try {
-      await toggleFavorite();
-      // TODO toast
-    } catch {
-      // TODO toast
-    }
-  }, [toggleFavorite]);
+  const { eventDetail, registrationStatus } = useEventDetailScreenView();
+  const { toggleFavorite, isProcessingFavorite, isFavorite } = useFavorite();
 
   const onPhoneRegistration = useCallback(async () => {
     if (eventDetail === null || eventDetail.contactPhone === null) return;
@@ -52,10 +44,14 @@ export function EventDetailBottomBar() {
         >
           <Button
             label="찜하기"
-            IconComponent={<Heart />}
-            variant="outline"
+            IconComponent={
+              <Heart fill={isFavorite ? "#ffffff" : "transparent"} />
+            }
+            variant={isFavorite ? "primary" : "outline"}
             size="lg"
             flexFill
+            onPress={toggleFavorite}
+            silentlyDisabled={isProcessingFavorite}
           />
         </Tooltip>
       );
@@ -91,9 +87,12 @@ export function EventDetailBottomBar() {
     );
   }, [
     eventDetail,
+    isFavorite,
+    isProcessingFavorite,
     onOnlineRegistration,
     onPhoneRegistration,
     registrationStatus,
+    toggleFavorite,
   ]);
 
   if (!eventDetail) return null;

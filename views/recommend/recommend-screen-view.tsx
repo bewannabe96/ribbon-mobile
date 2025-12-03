@@ -13,8 +13,6 @@ export default function RecommendScreenView() {
   const { customEvents, ongoingEvents, newEvents, isLoading } =
     useRecommendScreenView();
 
-  if (user == null) return null;
-
   if (isLoading) {
     return (
       <View style={styles.container}>
@@ -34,10 +32,12 @@ export default function RecommendScreenView() {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        <EventSection
-          title={`"${user.username}"님을 위한 맞춤 프로그램`}
-          events={customEvents}
-        />
+        {user !== null && (
+          <EventSection
+            title={`"${user.username}"님을 위한 맞춤 프로그램`}
+            events={customEvents}
+          />
+        )}
         <EventSection title="진행 중인 행사 및 축제" events={ongoingEvents} />
         <EventSection title="새로 등록된 프로그램" events={newEvents} />
       </ScrollView>

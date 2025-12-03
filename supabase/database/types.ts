@@ -533,6 +533,42 @@ export type Database = {
         }
         Relationships: []
       }
+      user_favorite: {
+        Row: {
+          created_at: string
+          id: number
+          pe_id: number
+          user_id: number
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+          pe_id: number
+          user_id: number
+        }
+        Update: {
+          created_at?: string
+          id?: number
+          pe_id?: number
+          user_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_public_event"
+            columns: ["pe_id"]
+            isOneToOne: false
+            referencedRelation: "public_event"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_user"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       username_prefix: {
         Row: {
           created_at: string | null

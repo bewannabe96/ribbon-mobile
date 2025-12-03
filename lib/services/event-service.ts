@@ -10,6 +10,50 @@ import { Event, RegistrationSession, TimetableSlot } from "./dto/common.dto";
 import { DateTime } from "luxon";
 
 class EventService {
+  /**
+   * Gets the current authenticated user's ID from the user table.
+   * @returns User ID (user.id)
+   * @throws Error if user is not authenticated or not found
+   */
+  private static async getCurrentUserId(): Promise<number | null> {
+    const { data: authData, error: authError } = await supabase.auth.getUser();
+    if (authError || !authData.user) {
+      return null;
+    }
+
+    const { data: userData, error: userError } = await supabase
+      .from("user")
+      .select("id")
+      .eq("auth_id", authData.user.id)
+      .single();
+
+    if (userError || !userData) {
+      throw new Error("User not found");
+    }
+
+    return userData.id;
+  }
+
+  /**
+   * Gets the event ID from UUID.
+   * @param uuid - Event UUID
+   * @returns Event ID (public_event.id)
+   * @throws Error if event not found
+   */
+  private static async getEventIdByUuid(uuid: string): Promise<number> {
+    const { data: eventData, error: eventError } = await supabase
+      .from("public_event")
+      .select("id")
+      .eq("uuid", uuid)
+      .single();
+
+    if (eventError || !eventData) {
+      throw new Error(`Event with UUID ${uuid} not found`);
+    }
+
+    return eventData.id;
+  }
+
   private static mapCategoryName(value: string) {
     const map: Record<string, string> = {
       lecture: "강의/강좌",
@@ -516,6 +560,90 @@ class EventService {
     const events = await EventService.applicationJoinEvent(ids);
 
     return { events, nextToken };
+  }
+
+  /**
+   * Adds an event to the current user's favorites.
+   * @param eventUuid - UUID of the event to add to favorites
+   * @throws Error if user is not authenticated or event not found
+   */
+  static async addFavorite(eventUuid: string): Promise<void> {
+    const [userId, eventId] = await Promise.all([
+      EventService.getCurrentUserId(),
+      EventService.getEventIdByUuid(eventUuid),
+    ]);
+
+    if (userId === null) {
+      throw new Error("User not authenticated");
+    }
+
+    const { error } = await supabase.from("user_favorite").insert({
+      user_id: userId,
+      pe_id: eventId,
+    });
+
+    if (error) {
+      // Check if it's a duplicate key error (already favorited)
+      // https://postgrest.org/en/stable/references/errors.html
+      if (error.code === "23505") return;
+      throw new Error(`Failed to add favorite: ${error.message}`);
+    }
+  }
+
+  /**
+   * Removes an event from the current user's favorites.
+   * @param eventUuid - UUID of the event to remove from favorites
+   * @throws Error if user is not authenticated or event not found
+   */
+  static async removeFavorite(eventUuid: string): Promise<void> {
+    const [userId, eventId] = await Promise.all([
+      EventService.getCurrentUserId(),
+      EventService.getEventIdByUuid(eventUuid),
+    ]);
+
+    if (userId === null) {
+      throw new Error("User not authenticated");
+    }
+
+    const { error } = await supabase
+      .from("user_favorite")
+      .delete()
+      .eq("user_id", userId)
+      .eq("pe_id", eventId);
+
+    if (error) {
+      throw new Error(`Failed to remove favorite: ${error.message}`);
+    }
+  }
+
+  /**
+   * Checks if an event is in the current user's favorites.
+   * @param eventUuid - UUID of the event to check
+   * @returns True if the event is favorited, false otherwise
+   * @throws Error if user is not authenticated or event not found
+   */
+  static async isFavorite(eventUuid: string): Promise<boolean> {
+    const [userId, eventId] = await Promise.all([
+      EventService.getCurrentUserId(),
+      EventService.getEventIdByUuid(eventUuid),
+    ]);
+
+    if (userId === null) {
+      return false;
+    }
+
+    const { data, error } = await supabase
+      .from("user_favorite")
+      .select("id")
+      .eq("user_id", userId)
+      .eq("pe_id", eventId)
+      .maybeSingle();
+
+    if (error) {
+      throw new Error(`Failed to check favorite status: ${error.message}`);
+    }
+
+    return data !== null;
   }
 }
 

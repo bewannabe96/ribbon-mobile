@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
+import { useMemo } from "react";
 import { useScreenContext } from "./event-detail-screen-context";
 import { DateTime } from "luxon";
 import { useLocalSearchParams } from "expo-router";
@@ -10,14 +10,8 @@ export function useEventDetailScreenView() {
 
   const { eventDetail } = useScreenContext();
 
-  const [isFavorite, setIsFavorite] = useState(false);
-
-  const toggleFavorite = useCallback(async () => {
-    setIsFavorite((prev) => !prev);
-    // TODO: Add API call to update favorite status
-  }, []);
-
   const externalShareUrl = useMemo(() => {
+    // TODO
     return `https://www.naver.com/${eventUuid}`;
   }, [eventUuid]);
 
@@ -32,10 +26,7 @@ export function useEventDetailScreenView() {
 
   return {
     eventDetail,
-    isFavorite,
     externalShareUrl,
     registrationStatus,
-    //
-    toggleFavorite,
   };
 }

@@ -5,23 +5,11 @@ import { router } from "expo-router";
 import { useCallback } from "react";
 import { ChevronLeft, Heart, Share2 } from "lucide-react-native";
 import { useEventDetailScreenView } from "@/views/event-detail/context/use-event-detail-screen-view";
+import { useFavorite } from "@/views/event-detail/context/use-favorite";
 
 export function EventDetailHeader() {
-  const { isFavorite, externalShareUrl, toggleFavorite } =
-    useEventDetailScreenView();
-
-  const handleBack = useCallback(() => {
-    router.back();
-  }, []);
-
-  const handleToggleFavorite = useCallback(async () => {
-    try {
-      await toggleFavorite();
-      // TODO toast
-    } catch {
-      // TODO toast
-    }
-  }, [toggleFavorite]);
+  const { eventDetail, externalShareUrl } = useEventDetailScreenView();
+  const { toggleFavorite, isProcessingFavorite, isFavorite } = useFavorite();
 
   const handleShare = useCallback(() => {
     // TODO: Implement share
@@ -32,32 +20,35 @@ export function EventDetailHeader() {
     <SafeAreaView edges={["top"]} style={styles.header}>
       <View style={styles.headerContent}>
         <TouchableOpacity
-          onPress={handleBack}
+          onPress={router.back}
           style={styles.headerButton}
           activeOpacity={0.6}
         >
-          <ChevronLeft size={24} color={StaticColor.gray900} />
+          <ChevronLeft size={26} color={StaticColor.gray900} />
         </TouchableOpacity>
-        <View style={styles.headerActions}>
-          <TouchableOpacity
-            onPress={handleToggleFavorite}
-            style={styles.headerButton}
-            activeOpacity={0.6}
-          >
-            <Heart
-              size={24}
-              color={isFavorite ? StaticColor.indigo600 : StaticColor.gray900}
-              fill={isFavorite ? StaticColor.indigo600 : "transparent"}
-            />
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={handleShare}
-            style={styles.headerButton}
-            activeOpacity={0.6}
-          >
-            <Share2 size={24} color={StaticColor.gray900} />
-          </TouchableOpacity>
-        </View>
+        {eventDetail !== null && (
+          <View style={styles.headerActions}>
+            <TouchableOpacity
+              style={styles.headerButton}
+              activeOpacity={0.6}
+              onPress={toggleFavorite}
+              disabled={isProcessingFavorite}
+            >
+              <Heart
+                size={26}
+                color={isFavorite ? StaticColor.red500 : StaticColor.gray900}
+                fill={isFavorite ? StaticColor.red500 : "transparent"}
+              />
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={handleShare}
+              style={styles.headerButton}
+              activeOpacity={0.6}
+            >
+              <Share2 size={26} color={StaticColor.gray900} />
+            </TouchableOpacity>
+          </View>
+        )}
       </View>
     </SafeAreaView>
   );
@@ -85,6 +76,6 @@ const styles = StyleSheet.create({
   headerActions: {
     flexDirection: "row",
     alignItems: "center",
-    gap: SizingScale[2],
+    gap: SizingScale[4],
   },
 });

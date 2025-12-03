@@ -5,13 +5,8 @@ import {
   TouchableOpacity,
   DimensionValue,
 } from "react-native";
-import React, {
-  useState,
-  useMemo,
-  useCallback,
-  PropsWithChildren,
-} from "react";
-import { Clock, Calendar, MapPin, Tag, Heart } from "lucide-react-native";
+import React, { useMemo, PropsWithChildren } from "react";
+import { Clock, Calendar, MapPin, Tag } from "lucide-react-native";
 import { Color, SizingScale, StaticColor } from "@/constants/theme";
 import Pill from "@/components/ui/pill";
 import { DateTime } from "luxon";
@@ -67,12 +62,6 @@ interface FullHeightEventItemProps {
 }
 
 export default function BasicEventItem(props: FullHeightEventItemProps) {
-  const [isLiked, setIsLiked] = useState(false);
-
-  const handleLikePress = useCallback(() => {
-    setIsLiked((prev) => !prev);
-  }, []);
-
   const periodText = useMemo(() => {
     const start = props.eventStart.toFormat("yyyy. MM. dd");
     const end = props.eventEnd.toFormat("yyyy. MM. dd");
@@ -109,17 +98,18 @@ export default function BasicEventItem(props: FullHeightEventItemProps) {
           <Pill name={props.category} size="sm" />
         </View>
 
-        <TouchableOpacity
-          onPress={handleLikePress}
-          style={styles.likeButton}
-          activeOpacity={0.6}
-        >
-          <Heart
-            size={24}
-            color={isLiked ? StaticColor.red500 : StaticColor.gray400}
-            fill={isLiked ? StaticColor.red500 : "none"}
-          />
-        </TouchableOpacity>
+        {/* TODO: should be implemented later on */}
+        {/*<TouchableOpacity*/}
+        {/*  onPress={handleLikePress}*/}
+        {/*  style={styles.likeButton}*/}
+        {/*  activeOpacity={0.6}*/}
+        {/*>*/}
+        {/*  <Heart*/}
+        {/*    size={24}*/}
+        {/*    color={isLiked ? StaticColor.red500 : StaticColor.gray400}*/}
+        {/*    fill={isLiked ? StaticColor.red500 : "none"}*/}
+        {/*  />*/}
+        {/*</TouchableOpacity>*/}
       </View>
 
       <Text style={styles.title} numberOfLines={2}>

@@ -23,6 +23,10 @@ export type EventDetail = {
 export type EventDetailScreenContextValue = {
   eventDetail: EventDetail | null;
   setEventDetail: (value: EventDetail) => void;
+  isFavorite: boolean;
+  setIsFavorite: (value: boolean) => void;
+  isProcessingFavorite: boolean;
+  setIsProcessingFavorite: (value: boolean) => void;
   isEventDetailLoading: boolean;
   setIsEventDetailLoading: (value: boolean) => void;
 };
@@ -37,6 +41,8 @@ type EventDetailProviderProps = {
 
 export function EventDetailProvider({ children }: EventDetailProviderProps) {
   const [eventDetail, setEventDetail] = useState<EventDetail | null>(null);
+  const [isFavorite, setIsFavorite] = useState(false);
+  const [isProcessingFavorite, setIsProcessingFavorite] = useState(false);
   const [isEventDetailLoading, setIsEventDetailLoading] = useState(false);
 
   return (
@@ -44,6 +50,10 @@ export function EventDetailProvider({ children }: EventDetailProviderProps) {
       value={{
         eventDetail,
         setEventDetail,
+        isFavorite,
+        setIsFavorite,
+        isProcessingFavorite,
+        setIsProcessingFavorite,
         isEventDetailLoading,
         setIsEventDetailLoading,
       }}

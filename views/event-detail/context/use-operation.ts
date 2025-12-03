@@ -34,7 +34,13 @@ const dayOfWeekStringMap: Record<number, string> = {
 };
 
 export function useOperation() {
-  const { setEventDetail, setIsEventDetailLoading } = useScreenContext();
+  const {
+    eventDetail,
+    setEventDetail,
+    setIsEventDetailLoading,
+    setIsFavorite,
+    isFavorite,
+  } = useScreenContext();
 
   const loadEventDetail = useCallback(
     async (eventUuid: string) => {
@@ -43,7 +49,10 @@ export function useOperation() {
 
         // TODO: logging should be removed after resolved (slow query)
         const start_t = Date.now();
-        const eventDetailDto = await EventService.getEventDetail(eventUuid);
+        const [eventDetailDto, isFavorite] = await Promise.all([
+          EventService.getEventDetail(eventUuid),
+          EventService.isFavorite(eventUuid),
+        ]);
         const end_t = Date.now();
         console.log(
           "`EventService.getEventDetail` took: ",
@@ -114,12 +123,30 @@ export function useOperation() {
           },
           description: `<body>${eventDetailDto.description}</body>`,
         });
+        setIsFavorite(isFavorite);
       } finally {
         setIsEventDetailLoading(false);
       }
     },
-    [setEventDetail, setIsEventDetailLoading],
+    [setEventDetail, setIsEventDetailLoading, setIsFavorite],
   );
 
-  return { loadEventDetail };
+  const toggleFavorite = useCallback(async () => {
+    if (eventDetail === null) return;
+
+    try {
+      setIsFavorite(!isFavorite);
+      if (isFavorite) {
+        await EventService.removeFavorite(eventDetail.uuid);
+      } else {
+        await EventService.addFavorite(eventDetail.uuid);
+      }
+    } catch (error) {
+      setIsFavorite(isFavorite);
+      console.log("Failed toggle favorite: " + error);
+      throw error;
+    }
+  }, [eventDetail, isFavorite, setIsFavorite]);
+
+  return { loadEventDetail, toggleFavorite };
 }

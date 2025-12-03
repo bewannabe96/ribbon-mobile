@@ -19,7 +19,7 @@ export default function RootLayout() {
         options={{
           title: "추천",
           tabBarIcon: ({ color }) => (
-            <ThumbsUp size={SizingScale[4]} color={color} />
+            <ThumbsUp size={SizingScale[5]} color={color} />
           ),
         }}
       />
@@ -28,7 +28,7 @@ export default function RootLayout() {
         options={{
           title: "탐색",
           tabBarIcon: ({ color }) => (
-            <Search size={SizingScale[4]} color={color} />
+            <Search size={SizingScale[5]} color={color} />
           ),
         }}
       />
@@ -37,7 +37,7 @@ export default function RootLayout() {
         options={{
           title: "내 정보",
           tabBarIcon: ({ color }) => (
-            <User size={SizingScale[4]} color={color} />
+            <User size={SizingScale[5]} color={color} />
           ),
         }}
       />

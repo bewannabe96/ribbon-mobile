@@ -15,6 +15,7 @@ type ButtonProps = {
   size?: "md" | "lg";
   color?: "indigo" | "red" | "orange" | "yellow" | "green" | "blue" | "gray";
   flexFill?: boolean;
+  silentlyDisabled?: boolean;
 } & Omit<TouchableOpacityProps, "style" | "activeOpacity">;
 
 export default function Button(props: ButtonProps) {
@@ -80,6 +81,7 @@ export default function Button(props: ButtonProps) {
 
   return (
     <TouchableOpacity
+      {...props}
       style={[
         styles.container,
         containerColorStyle,
@@ -88,7 +90,7 @@ export default function Button(props: ButtonProps) {
         props.flexFill && { flex: 1 },
       ]}
       activeOpacity={0.6}
-      {...props}
+      disabled={props.disabled || props.silentlyDisabled}
     >
       <View style={styles.content}>
         {props.IconComponent &&
