@@ -1,64 +1,251 @@
-import { useThemeColor } from "@/hooks/use-theme-color";
-import { StyleSheet, Text, View } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  DimensionValue,
+} from "react-native";
+import React, {
+  useState,
+  useMemo,
+  useCallback,
+  PropsWithChildren,
+} from "react";
+import { Clock, Calendar, MapPin, Tag, Heart } from "lucide-react-native";
+import { Color, SizingScale, StaticColor } from "@/constants/theme";
+import Pill from "@/components/ui/pill";
+import { DateTime } from "luxon";
+import { router } from "expo-router";
 
-type BasicEventItemProps = {};
+interface InfoRowProps {
+  IconComponent: React.ReactElement;
+  label: string;
+}
 
-export default function BasicEventItem(props: BasicEventItemProps) {
-  const themeText = useThemeColor({}, "text");
-  const themeTint = useThemeColor({}, "tint");
+function InfoRow(props: PropsWithChildren<InfoRowProps>) {
+  return (
+    <View style={infoRowStyles.container}>
+      <View style={infoRowStyles.iconView}>{props.IconComponent}</View>
+      <View>
+        <Text style={infoRowStyles.infoLabel}>{props.label}</Text>
+        {props.children}
+      </View>
+    </View>
+  );
+}
+
+const infoRowStyles = StyleSheet.create({
+  container: {
+    flexDirection: "row",
+    gap: SizingScale[2],
+  },
+
+  iconView: {
+    marginTop: 2,
+  },
+
+  infoLabel: {
+    fontSize: 14,
+    color: StaticColor.gray600,
+    marginBottom: SizingScale[2.5],
+  },
+});
+
+interface FullHeightEventItemProps {
+  width?: DimensionValue;
+
+  uuid: string;
+  name: string;
+  category: string;
+  registrationStart: DateTime | null;
+  registrationEnd: DateTime | null;
+  eventStart: DateTime;
+  eventEnd: DateTime;
+  location: string | null;
+  participationFee: number | null;
+  registrationStatus: "upcoming" | "opened" | "closed" | null;
+}
+
+export default function BasicEventItem(props: FullHeightEventItemProps) {
+  const [isLiked, setIsLiked] = useState(false);
+
+  const handleLikePress = useCallback(() => {
+    setIsLiked((prev) => !prev);
+  }, []);
+
+  const periodText = useMemo(() => {
+    const start = props.eventStart.toFormat("yyyy. MM. dd");
+    const end = props.eventEnd.toFormat("yyyy. MM. dd");
+    if (start === end) {
+      return `${start} (당일)`;
+    }
+    return `${start} - ${end}`;
+  }, [props.eventStart, props.eventEnd]);
+
+  const participationFeeText = useMemo(() => {
+    if (!props.participationFee) return null;
+    if (props.participationFee === 0) return "무료";
+    else if (props.participationFee === -1) return "유료";
+    return props.participationFee.toLocaleString() + "원";
+  }, [props.participationFee]);
 
   return (
-    <View style={[styles.container, { borderColor: themeTint }]}>
-      <Text style={[styles.originalTitleText, { color: themeText }]}>
-        헤드-원데이 클래스(크리스마스트리 12월4일)
+    <TouchableOpacity
+      activeOpacity={0.6}
+      style={[styles.container, { width: props.width }]}
+      onPress={() => router.push(`/event-detail/${props.uuid}`)}
+    >
+      {/* Badge & Like */}
+      <View style={styles.header}>
+        <View style={styles.pillContainer}>
+          {props.registrationStatus === "upcoming" ? (
+            <Pill name="접수전" size="sm" color="blue" variant="secondary" />
+          ) : props.registrationStatus === "opened" ? (
+            <Pill name="접수중" size="sm" color="green" variant="secondary" />
+          ) : props.registrationStatus === "closed" ? (
+            <Pill name="접수마감" size="sm" color="red" variant="secondary" />
+          ) : null}
+
+          <Pill name={props.category} size="sm" />
+        </View>
+
+        <TouchableOpacity
+          onPress={handleLikePress}
+          style={styles.likeButton}
+          activeOpacity={0.6}
+        >
+          <Heart
+            size={24}
+            color={isLiked ? StaticColor.red500 : StaticColor.gray400}
+            fill={isLiked ? StaticColor.red500 : "none"}
+          />
+        </TouchableOpacity>
+      </View>
+
+      <Text style={styles.title} numberOfLines={2}>
+        {props.name}
       </Text>
-      <Text style={[styles.titleText, { color: themeText }]}>
-        크리스마스 트리 원데이 클래스
-      </Text>
-      <Text style={[styles.descText, { color: themeText, fontWeight: "bold" }]}>
-        강남구 시니어 복지관 / 30,000원
-      </Text>
-      <Text style={[styles.subtitleText, { color: themeText }]}>신청기간</Text>
-      <Text style={[styles.descText, { color: themeText }]}>
-        24.08.01 (09:00) ~ 24.09.30 (18:00)
-      </Text>
-      <Text style={[styles.subtitleText, { color: themeText }]}>교육기간</Text>
-      <Text style={[styles.descText, { color: themeText, marginBottom: 0 }]}>
-        24.10.01 ~ 24.10.01
-      </Text>
-    </View>
+
+      <View style={styles.centerContainer}>
+        {(props.registrationStart !== null ||
+          props.registrationEnd !== null) && (
+          <InfoRow
+            IconComponent={<Clock size={16} color={StaticColor.gray400} />}
+            label="신청기간"
+          >
+            <View style={styles.registrationDates}>
+              {props.registrationStart !== null && (
+                <Text style={styles.valueText}>
+                  시작:{"  "}
+                  {props.registrationStart.toFormat("yyyy. MM. dd HH:mm")}
+                </Text>
+              )}
+              {props.registrationEnd !== null && (
+                <Text style={styles.valueText}>
+                  종료:{"  "}
+                  {props.registrationEnd.toFormat("yyyy. MM. dd HH:mm")}
+                </Text>
+              )}
+            </View>
+          </InfoRow>
+        )}
+
+        <InfoRow
+          IconComponent={<Calendar size={16} color={StaticColor.gray400} />}
+          label="진행기간"
+        >
+          <Text style={styles.valueText}>{periodText}</Text>
+        </InfoRow>
+
+        {props.location !== null && (
+          <InfoRow
+            IconComponent={<MapPin size={16} color={StaticColor.gray400} />}
+            label="장소"
+          >
+            <Text style={styles.valueText}>{props.location}</Text>
+          </InfoRow>
+        )}
+      </View>
+
+      {props.participationFee !== null && (
+        <View style={styles.priceContainer}>
+          <Tag size={16} color={StaticColor.gray400} />
+          <Text style={styles.priceLabel}>참가비</Text>
+          <Text style={styles.priceValue}>{participationFeeText}</Text>
+        </View>
+      )}
+    </TouchableOpacity>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    borderWidth: 0.5,
-    paddingHorizontal: 12,
-    paddingVertical: 12,
-    borderRadius: 12,
+    backgroundColor: Color.background,
+    borderRadius: SizingScale[4],
+    borderWidth: 2,
+    borderColor: StaticColor.gray400,
+    paddingTop: SizingScale[4],
+    paddingBottom: SizingScale[6],
+    paddingHorizontal: SizingScale[4],
   },
 
-  originalTitleText: {
-    fontSize: 14,
-    opacity: 0.6,
-    marginBottom: 2,
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: SizingScale[2],
   },
 
-  titleText: {
+  pillContainer: {
+    flexDirection: "row",
+    gap: SizingScale[2],
+    flexWrap: "wrap",
+    flex: 1,
+  },
+
+  likeButton: {
+    padding: SizingScale[1.5],
+  },
+
+  title: {
     fontSize: 24,
-    marginBottom: 14,
-  },
-
-  descText: {
-    fontSize: 14,
-    opacity: 0.6,
-    marginBottom: 18,
-  },
-
-  subtitleText: {
-    fontSize: 12,
-    opacity: 0.6,
+    marginBottom: SizingScale[6],
     fontWeight: "bold",
-    marginBottom: 2,
+  },
+
+  centerContainer: {
+    flex: 1,
+    gap: SizingScale[6],
+  },
+
+  registrationDates: {
+    gap: SizingScale[2.5],
+  },
+
+  valueText: {
+    fontSize: 16,
+    lineHeight: 17,
+  },
+
+  priceContainer: {
+    borderTopWidth: 1,
+    borderTopColor: Color.border,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: SizingScale[2],
+    marginTop: SizingScale[6],
+    paddingTop: SizingScale[6],
+  },
+
+  priceLabel: {
+    fontSize: 16,
+    color: StaticColor.gray600,
+  },
+
+  priceValue: {
+    fontSize: 18,
+    lineHeight: 19,
+    color: StaticColor.indigo600,
+    marginStart: "auto",
   },
 });

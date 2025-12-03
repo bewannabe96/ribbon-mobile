@@ -1,126 +1,141 @@
-import { Image } from "expo-image";
-import { Platform, StyleSheet } from "react-native";
+import { Text, StyleSheet, TouchableOpacity, View } from "react-native";
+import {
+  Section,
+  SectionBody,
+  SectionSeparator,
+} from "@/components/ui/section";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { useThemeColor } from "@/hooks/use-theme-color";
+import { Sizing } from "@/constants/theme";
+import { router } from "expo-router";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import { useCallback } from "react";
+import * as WebBrowser from "expo-web-browser";
 
-import { Collapsible } from "@/components/ui/collapsible";
-import { ExternalLink } from "@/components/external-link";
-import ParallaxScrollView from "@/components/parallax-scroll-view";
-import { ThemedText } from "@/components/themed-text";
-import { ThemedView } from "@/components/themed-view";
-import { IconSymbol } from "@/components/ui/icon-symbol";
-import { Fonts } from "@/constants/theme";
+export default function ProfileScreen() {
+  const themeTint = useThemeColor("tint");
+  const themeBackground = useThemeColor("background");
+  const themeText = useThemeColor("text");
 
-export default function TabTwoScreen() {
+  const onTermsOfServicePressed = useCallback(async () => {
+    await WebBrowser.openBrowserAsync("https://www.naver.com");
+  }, []);
+
+  const onPrivacyPolicyPressed = useCallback(async () => {
+    await WebBrowser.openBrowserAsync("https://www.naver.com");
+  }, []);
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: "#FF0000", dark: "#ffffff" }}
-      headerImage={
-        <IconSymbol
-          size={310}
-          color="#808080"
-          name="chevron.left.forwardslash.chevron.right"
-          style={styles.headerImage}
-        />
-      }
-    >
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText
-          type="title"
-          style={{
-            fontFamily: Fonts.rounded,
-          }}
-        >
-          Explore
-        </ThemedText>
-      </ThemedView>
-      <ThemedText>
-        This app includes example code to help you get started.
-      </ThemedText>
-      <Collapsible title="File-based routing">
-        <ThemedText>
-          This app has two screens:{" "}
-          <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText>{" "}
-          and{" "}
-          <ThemedText type="defaultSemiBold">app/(tabs)/explore.tsx</ThemedText>
-        </ThemedText>
-        <ThemedText>
-          The layout file in{" "}
-          <ThemedText type="defaultSemiBold">app/(tabs)/_layout.tsx</ThemedText>{" "}
-          sets up the tab navigator.
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/router/introduction">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Android, iOS, and web support">
-        <ThemedText>
-          You can open this project on Android, iOS, and the web. To open the
-          web version, press <ThemedText type="defaultSemiBold">w</ThemedText>{" "}
-          in the terminal running this project.
-        </ThemedText>
-      </Collapsible>
-      <Collapsible title="Images">
-        <ThemedText>
-          For static images, you can use the{" "}
-          <ThemedText type="defaultSemiBold">@2x</ThemedText> and{" "}
-          <ThemedText type="defaultSemiBold">@3x</ThemedText> suffixes to
-          provide files for different screen densities
-        </ThemedText>
-        <Image
-          source={require("@/assets/images/react-logo.png")}
-          style={{ width: 100, height: 100, alignSelf: "center" }}
-        />
-        <ExternalLink href="https://reactnative.dev/docs/images">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Light and dark mode components">
-        <ThemedText>
-          This template has light and dark mode support. The{" "}
-          <ThemedText type="defaultSemiBold">useColorScheme()</ThemedText> hook
-          lets you inspect what the user&apos;s current color scheme is, and so
-          you can adjust UI colors accordingly.
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/develop/user-interface/color-themes/">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Animations">
-        <ThemedText>
-          This template includes an example of an animated component. The{" "}
-          <ThemedText type="defaultSemiBold">
-            components/HelloWave.tsx
-          </ThemedText>{" "}
-          component uses the powerful{" "}
-          <ThemedText type="defaultSemiBold" style={{ fontFamily: Fonts.mono }}>
-            react-native-reanimated
-          </ThemedText>{" "}
-          library to create a waving hand animation.
-        </ThemedText>
-        {Platform.select({
-          ios: (
-            <ThemedText>
-              The{" "}
-              <ThemedText type="defaultSemiBold">
-                components/ParallaxScrollView.tsx
-              </ThemedText>{" "}
-              component provides a parallax effect for the header image.
-            </ThemedText>
-          ),
-        })}
-      </Collapsible>
-    </ParallaxScrollView>
+    <View style={styles.container}>
+      <SafeAreaView
+        style={[styles.navigationBar, { backgroundColor: themeBackground }]}
+        edges={["top"]}
+      >
+        <Text style={[styles.headerText, { color: themeText }]}>내 정보</Text>
+      </SafeAreaView>
+
+      <Section>
+        <SectionBody>
+          <TouchableOpacity
+            style={[styles.loginButton, { backgroundColor: themeTint }]}
+            onPress={() => router.push("/sign-in")}
+            activeOpacity={0.6}
+          >
+            <Text style={[styles.buttonText, { color: themeBackground }]}>
+              로그인 / 회원가입
+            </Text>
+          </TouchableOpacity>
+        </SectionBody>
+      </Section>
+
+      <SectionSeparator />
+
+      <Section>
+        <View style={styles.listButtonView}>
+          <TouchableOpacity
+            style={styles.listButton}
+            onPress={onTermsOfServicePressed}
+          >
+            <Text style={[styles.listButtonText, { color: themeText }]}>
+              서비스 이용약관
+            </Text>
+            <MaterialIcons name="chevron-right" size={20} color={themeText} />
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.listButton}
+            onPress={onPrivacyPolicyPressed}
+          >
+            <Text style={[styles.listButtonText, { color: themeText }]}>
+              개인정보처리 방침
+            </Text>
+            <MaterialIcons name="chevron-right" size={20} color={themeText} />
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.listButton}>
+            <Text style={[styles.listButtonText, { color: themeText }]}>
+              고객센터
+            </Text>
+            <MaterialIcons name="chevron-right" size={20} color={themeText} />
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.listButton}>
+            <Text style={[styles.listButtonText, { color: themeText }]}>
+              피드백
+            </Text>
+            <MaterialIcons name="chevron-right" size={20} color={themeText} />
+          </TouchableOpacity>
+          {/*<TouchableOpacity style={styles.listButton}>*/}
+          {/*  <Text style={[styles.listButtonText, { color: themeText }]}>*/}
+          {/*    로그아웃*/}
+          {/*  </Text>*/}
+          {/*  <MaterialIcons name="chevron-right" size={20} color={themeText} />*/}
+          {/*</TouchableOpacity>*/}
+        </View>
+      </Section>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  headerImage: {
-    color: "#808080",
-    bottom: -90,
-    left: -35,
-    position: "absolute",
+  container: {
+    flex: 1,
   },
-  titleContainer: {
+
+  navigationBar: {
+    paddingHorizontal: Sizing.screenPaddingX,
+    paddingVertical: 18,
+  },
+
+  headerText: {
+    fontSize: 18,
+    fontWeight: "bold",
+    textAlign: "center",
+  },
+
+  loginButton: {
+    height: 52,
     flexDirection: "row",
-    gap: 8,
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 8,
+    gap: 12,
+  },
+
+  buttonText: {
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+
+  listButtonView: {
+    gap: 12,
+  },
+
+  listButton: {
+    paddingHorizontal: Sizing.screenPaddingX,
+    paddingVertical: 12,
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+
+  listButtonText: {
+    fontSize: 16,
   },
 });
