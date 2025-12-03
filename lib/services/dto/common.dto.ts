@@ -60,3 +60,11 @@ export interface EventDetail {
   participationFee: number | null;
   targetResidence: string | null;
 }
+
+export interface User {
+  uid: string;
+  username: string;
+  email: string | null;
+  profileImageUrl: string | null;
+  createdAt: string;
+}

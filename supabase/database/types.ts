@@ -500,6 +500,75 @@ export type Database = {
           },
         ]
       }
+      user: {
+        Row: {
+          auth_id: string | null
+          created_at: string
+          email: string | null
+          id: number
+          profile_image_url: string | null
+          uid: string
+          updated_at: string
+          username: string
+        }
+        Insert: {
+          auth_id?: string | null
+          created_at?: string
+          email?: string | null
+          id?: number
+          profile_image_url?: string | null
+          uid: string
+          updated_at?: string
+          username: string
+        }
+        Update: {
+          auth_id?: string | null
+          created_at?: string
+          email?: string | null
+          id?: number
+          profile_image_url?: string | null
+          uid?: string
+          updated_at?: string
+          username?: string
+        }
+        Relationships: []
+      }
+      username_prefix: {
+        Row: {
+          created_at: string | null
+          id: number
+          prefix: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: number
+          prefix: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: number
+          prefix?: string
+        }
+        Relationships: []
+      }
+      username_suffix: {
+        Row: {
+          created_at: string | null
+          id: number
+          suffix: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: number
+          suffix: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: number
+          suffix?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

@@ -6,7 +6,7 @@ export default function RecommendHeader() {
   return (
     <View style={styles.container}>
       <SafeAreaView edges={["top"]}>
-        <Text style={styles.logoText}>오소</Text>
+        <Text style={styles.logoText}>리본</Text>
       </SafeAreaView>
     </View>
   );
@@ -22,8 +22,8 @@ const styles = StyleSheet.create({
   },
 
   logoText: {
-    fontFamily: "Black Han Sans",
-    fontSize: 40,
+    fontFamily: "Jalnan2",
+    fontSize: 32,
     color: StaticColor.indigo600,
   },
 

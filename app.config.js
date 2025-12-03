@@ -46,23 +46,12 @@ module.exports = {
       "expo-secure-store",
       "expo-web-browser",
       "expo-apple-authentication",
-      [
-        "expo-splash-screen",
-        {
-          image: "./assets/images/splash-icon.png",
-          imageWidth: 200,
-          resizeMode: "contain",
-          backgroundColor: "#ffffff",
-          dark: {
-            backgroundColor: "#000000",
-          },
-        },
-      ],
+      ["expo-splash-screen", { backgroundColor: "#ffffff" }],
       [
         "expo-font",
         {
           fonts: [
-            "./assets/fonts/BlackHanSans-Regular.ttf",
+            "./assets/fonts/Jalnan2-Regular.otf",
             "./assets/fonts/Pretendard-Thin.otf",
             "./assets/fonts/Pretendard-ExtraLight.otf",
             "./assets/fonts/Pretendard-Light.otf",
@@ -83,15 +72,15 @@ module.exports = {
       //     ios: { handleKakaoOpenUrl: true },
       //   },
       // ],
-      // [
-      //   "@react-native-seoul/naver-login",
-      //   {
-      //     appName: process.env.EXPO_PUBLIC_NAVER_APP_NAME,
-      //     clientId: process.env.EXPO_PUBLIC_NAVER_CLIENT_ID,
-      //     clientSecret: process.env.EXPO_PUBLIC_NAVER_CLIENT_SECRET,
-      //     urlScheme: process.env.EXPO_PUBLIC_NAVER_SCHEME,
-      //   },
-      // ],
+      [
+        "@react-native-seoul/naver-login",
+        {
+          // appName: process.env.EXPO_PUBLIC_NAVER_APP_NAME,
+          // clientId: process.env.EXPO_PUBLIC_NAVER_CLIENT_ID,
+          // clientSecret: process.env.EXPO_PUBLIC_NAVER_CLIENT_SECRET,
+          urlScheme: process.env.EXPO_PUBLIC_NAVER_SCHEME,
+        },
+      ],
     ],
     experiments: {
       typedRoutes: true,

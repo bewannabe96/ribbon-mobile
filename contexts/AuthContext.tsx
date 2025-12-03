@@ -3,103 +3,102 @@ import {
   useContext,
   useEffect,
   useState,
-  useMemo,
   useCallback,
+  PropsWithChildren,
+  useMemo,
 } from "react";
-import { Session } from "@supabase/supabase-js";
+import { AuthChangeEvent, Session } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase";
-import { router } from "expo-router";
-import * as Linking from "expo-linking";
+import { UserService, User } from "@/lib/services";
 
 interface AuthContextType {
   session: Session | null;
-  user: Session["user"] | null;
-  isLoading: boolean;
+  user: User | null;
+  isInitialized: boolean;
+  isSignedIn: boolean;
+  initialize: () => Promise<void>;
   signOut: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({
   session: null,
   user: null,
-  isLoading: true,
+  isInitialized: false,
+  isSignedIn: false,
+  initialize: async () => {},
   signOut: async () => {},
 });
 
-export function AuthProvider({ children }: { children: React.ReactNode }) {
+export function AuthProvider(props: PropsWithChildren) {
+  const [isInitialized, setIsInitialized] = useState(false);
   const [session, setSession] = useState<Session | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [user, setUser] = useState<User | null>(null);
 
-  useEffect(() => {
-    // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setIsLoading(false);
-    });
-
-    // Listen for auth changes
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-
-      // Redirect to home when logged in
-      if (session) {
-        router.replace("/");
+  const onSessionChange = useCallback(async (session: Session | null) => {
+    if (session === null) {
+      setUser(null);
+      return;
+    } else {
+      try {
+        const result = await UserService.getOrCreateUser();
+        setUser(result.user);
+      } catch (error) {
+        console.error("Sign in failed: " + error);
       }
-    });
-
-    return () => {
-      subscription.unsubscribe();
-    };
+    }
   }, []);
 
   useEffect(() => {
-    // Handle deep linking for OAuth redirect
-    const handleDeepLink = (url: string) => {
-      // Extract the URL parameters
-      const urlObj = new URL(url);
-      const accessToken = urlObj.searchParams.get("access_token");
-      const refreshToken = urlObj.searchParams.get("refresh_token");
+    if (!isInitialized) return;
 
-      // If we have tokens in the URL, set the session
-      if (accessToken && refreshToken) {
-        supabase.auth
-          .setSession({
-            access_token: accessToken,
-            refresh_token: refreshToken,
-          })
-          .then();
-      }
-    };
+    const { data } = supabase.auth.onAuthStateChange(
+      (_: AuthChangeEvent, session: Session | null) => setSession(session),
+    );
+    return () => data.subscription.unsubscribe();
+  }, [isInitialized]);
 
-    // Get initial URL
-    Linking.getInitialURL().then((url) => {
-      if (url) handleDeepLink(url);
-    });
+  useEffect(() => {
+    onSessionChange(session).then();
 
-    // Listen for URL changes
-    const subscription = Linking.addEventListener("url", (event) => {
-      handleDeepLink(event.url);
-    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [session]);
 
-    return () => subscription.remove();
+  const initialize = useCallback(async () => {
+    const { data, error } = await supabase.auth.getSession();
+
+    if (error) {
+      console.log(
+        "Initializing auth state failed: " +
+          (error?.message ?? "Unknown Error"),
+      );
+    }
+
+    setSession(data.session);
+    setIsInitialized(true);
   }, []);
 
   const signOut = useCallback(async () => {
     await supabase.auth.signOut();
   }, []);
 
-  const value = useMemo(
-    () => ({
-      session: session,
-      user: session?.user ?? null,
-      isLoading: isLoading,
-      signOut: signOut,
-    }),
-    [session, isLoading, signOut],
-  );
+  const isSignedIn = useMemo(() => {
+    return session !== null && user !== null;
+  }, [session, user]);
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider
+      value={{
+        session: session,
+        user: user,
+        isInitialized: isInitialized,
+        isSignedIn: isSignedIn,
+        initialize: initialize,
+        signOut: signOut,
+      }}
+    >
+      {props.children}
+    </AuthContext.Provider>
+  );
 }
 
 export const useAuth = () => {
