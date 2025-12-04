@@ -15,7 +15,7 @@ type KakaoJwtPayload = {
 export async function signInWithKakao(): Promise<User | null> {
   let idToken: string | null;
   try {
-    const token = await KakaoUser.login();
+    const token = await KakaoUser.login({ useKakaoAccountLogin: true });
     idToken = token.idToken ?? null;
   } catch {
     return null;

@@ -14,12 +14,12 @@ export default function ProfileScreenView() {
   const { isSignedIn, user, signOut } = useAuth();
 
   const onTermsOfServicePressed = useCallback(async () => {
-    const url = process.env.EXPO_TERMS_OF_SERVICE_URL;
+    const url = process.env.EXPO_PUBLIC_TERMS_OF_SERVICE_URL;
     if (url) await WebBrowser.openBrowserAsync(url);
   }, []);
 
   const onPrivacyPolicyPressed = useCallback(async () => {
-    const url = process.env.EXPO_PRIVACY_POLICY_URL;
+    const url = process.env.EXPO_PUBLIC_PRIVACY_POLICY_URL;
     if (url) await WebBrowser.openBrowserAsync(url);
   }, []);
 

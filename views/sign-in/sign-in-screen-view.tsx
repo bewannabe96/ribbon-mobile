@@ -1,9 +1,16 @@
-import { View, Text, StyleSheet, TouchableOpacity, Alert } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  Alert,
+  Platform,
+} from "react-native";
 import { router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import React, { useState, useCallback } from "react";
 import { Color, Sizing, SizingScale, StaticColor } from "@/constants/theme";
-import { Image } from "expo-image";
+import { Image, ImageSource } from "expo-image";
 import { X } from "lucide-react-native";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -12,6 +19,42 @@ const PROVIDER_COLOR = {
   naver: { text: "#ffffff", background: "#03c75a" },
   apple: { text: "#ffffff", background: "#000000" },
 };
+
+type SignInButtonProps = {
+  title: string;
+  iconImageSource: ImageSource;
+  backgroundColor: string;
+  textColor: string;
+  isLoading: boolean;
+  onPress: () => void;
+};
+
+function SignInButton(props: SignInButtonProps) {
+  return (
+    <TouchableOpacity
+      style={[
+        styles.buttonBasic,
+        {
+          backgroundColor: props.backgroundColor,
+          opacity: props.isLoading ? 0.5 : 1,
+        },
+      ]}
+      disabled={props.isLoading}
+      activeOpacity={0.6}
+      onPress={props.onPress}
+    >
+      <Image
+        source={props.iconImageSource}
+        style={styles.buttonIcon}
+        contentFit="contain"
+        tintColor={props.textColor}
+      />
+      <Text style={[styles.buttonTextBasic, { color: props.textColor }]}>
+        {props.title}
+      </Text>
+    </TouchableOpacity>
+  );
+}
 
 export default function SignInScreenView() {
   const { signInWithNaver, signInWithKakao, signInWithApple } = useAuth();
@@ -87,60 +130,24 @@ export default function SignInScreenView() {
           {/*    네이버로 시작하기*/}
           {/*  </Text>*/}
           {/*</TouchableOpacity>*/}
-          <TouchableOpacity
-            style={[
-              styles.buttonBasic,
-              {
-                backgroundColor: PROVIDER_COLOR.kakao.background,
-                opacity: loading ? 0.5 : 1,
-              },
-            ]}
-            disabled={loading}
-            activeOpacity={0.6}
+          <SignInButton
+            title="카카오로 시작하기"
+            iconImageSource={require("@/assets/logo/kakao.svg")}
             onPress={handleSignin.bind(null, "kakao")}
-          >
-            <Image
-              source={require("@/assets/logo/kakao.svg")}
-              style={styles.buttonIcon}
-              contentFit="contain"
-              tintColor={PROVIDER_COLOR.kakao.text}
+            backgroundColor={PROVIDER_COLOR.kakao.background}
+            textColor={PROVIDER_COLOR.kakao.text}
+            isLoading={loading}
+          />
+          {Platform.OS === "ios" && (
+            <SignInButton
+              title="Apple로 시작하기"
+              iconImageSource={require("@/assets/logo/apple.svg")}
+              onPress={handleSignin.bind(null, "apple")}
+              backgroundColor={PROVIDER_COLOR.apple.background}
+              textColor={PROVIDER_COLOR.apple.text}
+              isLoading={loading}
             />
-            <Text
-              style={[
-                styles.buttonTextBasic,
-                { color: PROVIDER_COLOR.kakao.text },
-              ]}
-            >
-              카카오로 시작하기
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[
-              styles.buttonBasic,
-              {
-                backgroundColor: PROVIDER_COLOR.apple.background,
-                opacity: loading ? 0.5 : 1,
-              },
-            ]}
-            disabled={loading}
-            activeOpacity={0.6}
-            onPress={handleSignin.bind(null, "apple")}
-          >
-            <Image
-              source={require("@/assets/logo/apple.svg")}
-              style={styles.buttonIcon}
-              contentFit="contain"
-              tintColor={PROVIDER_COLOR.apple.text}
-            />
-            <Text
-              style={[
-                styles.buttonTextBasic,
-                { color: PROVIDER_COLOR.apple.text },
-              ]}
-            >
-              Apple로 시작하기
-            </Text>
-          </TouchableOpacity>
+          )}
         </View>
       </View>
     </View>

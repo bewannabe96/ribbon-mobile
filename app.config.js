@@ -27,10 +27,6 @@ module.exports = {
       edgeToEdgeEnabled: true,
       package: "dev.b1ob.ribbon",
     },
-    web: {
-      output: "static",
-      favicon: "./assets/images/favicon.png",
-    },
     plugins: [
       [
         "expo-build-properties",
@@ -46,7 +42,13 @@ module.exports = {
       "expo-secure-store",
       "expo-web-browser",
       "expo-apple-authentication",
-      ["expo-splash-screen", { backgroundColor: "#ffffff" }],
+      [
+        "expo-splash-screen",
+        {
+          image: "./assets/images/splash-icon.png",
+          backgroundColor: "#ffffff",
+        },
+      ],
       [
         "expo-font",
         {
@@ -62,16 +64,29 @@ module.exports = {
             "./assets/fonts/Pretendard-ExtraBold.otf",
             "./assets/fonts/Pretendard-Black.otf",
           ],
+          android: {
+            fonts: [
+              {
+                fontFamily: "Jalnan2",
+                fontDefinitions: [
+                  {
+                    path: "./assets/fonts/Jalnan2-Regular.otf",
+                    weight: 400,
+                  },
+                ],
+              },
+            ],
+          },
         },
       ],
-      // [
-      //   "@react-native-kakao/core",
-      //   {
-      //     nativeAppKey: process.env.EXPO_PUBLIC_KAKAO_APP_KEY,
-      //     android: { authCodeHandlerActivity: true },
-      //     ios: { handleKakaoOpenUrl: true },
-      //   },
-      // ],
+      [
+        "@react-native-kakao/core",
+        {
+          nativeAppKey: process.env.EXPO_PUBLIC_KAKAO_APP_KEY,
+          android: { authCodeHandlerActivity: true },
+          ios: { handleKakaoOpenUrl: true },
+        },
+      ],
       [
         "@react-native-seoul/naver-login",
         {
