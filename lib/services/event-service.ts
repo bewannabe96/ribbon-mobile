@@ -645,6 +645,42 @@ class EventService {
 
     return data !== null;
   }
+
+  /**
+   * Records a view history for an event.
+   * If a view history already exists for this user and event, updates the viewed_at timestamp.
+   * @param eventUuid - UUID of the event to record view history
+   * @throws Error if user is not authenticated or event not found
+   */
+  static async recordEventView(eventUuid: string): Promise<void> {
+    const [userId, eventId] = await Promise.all([
+      EventService.getCurrentUserId(),
+      EventService.getEventIdByUuid(eventUuid),
+    ]);
+
+    if (userId === null) {
+      throw new Error("User not authenticated");
+    }
+
+    const now = DateTime.now().toISO();
+
+    const { error } = await supabase
+      .from("user_event_view_history")
+      .upsert(
+        {
+          user_id: userId,
+          pe_id: eventId,
+          viewed_at: now,
+        },
+        {
+          onConflict: "user_id,pe_id",
+        }
+      );
+
+    if (error) {
+      throw new Error(`Failed to record event view: ${error.message}`);
+    }
+  }
 }
 
 export default EventService;

@@ -533,6 +533,42 @@ export type Database = {
         }
         Relationships: []
       }
+      user_event_view_history: {
+        Row: {
+          id: number
+          pe_id: number
+          user_id: number
+          viewed_at: string
+        }
+        Insert: {
+          id?: number
+          pe_id: number
+          user_id: number
+          viewed_at?: string
+        }
+        Update: {
+          id?: number
+          pe_id?: number
+          user_id?: number
+          viewed_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_public_event"
+            columns: ["pe_id"]
+            isOneToOne: false
+            referencedRelation: "public_event"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_user"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_favorite: {
         Row: {
           created_at: string

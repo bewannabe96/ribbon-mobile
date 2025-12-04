@@ -148,5 +148,9 @@ export function useOperation() {
     }
   }, [eventDetail, isFavorite, setIsFavorite]);
 
-  return { loadEventDetail, toggleFavorite };
+  const recordEventView = useCallback(async (eventUuid: string) => {
+    await EventService.recordEventView(eventUuid);
+  }, []);
+
+  return { loadEventDetail, toggleFavorite, recordEventView };
 }
