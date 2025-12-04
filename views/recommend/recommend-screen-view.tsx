@@ -34,7 +34,7 @@ export default function RecommendScreenView() {
       >
         {user !== null && (
           <EventSection
-            title={`"${user.username}"님을 위한 맞춤 프로그램`}
+            title={`"${user.username}"님을 위한\n맞춤 프로그램`}
             events={customEvents}
           />
         )}

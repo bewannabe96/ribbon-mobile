@@ -96,6 +96,60 @@ class UserService {
   }
 
   /**
+   * Updates user information for the currently authenticated user.
+   * Uses auth_id from the access token to identify the user.
+   * @param updates - Fields to update (username, email, profileImageUrl)
+   * @returns Updated user information
+   */
+  static async updateUser(updates: {
+    username?: string;
+    email?: string;
+    profileImageUrl?: string;
+  }): Promise<User> {
+    // mimics access token parsing
+    const { data: authData, error: authError } = await supabase.auth.getUser();
+    const authUser = authData.user;
+
+    if (authError || authUser === null) {
+      // refers to 401 if this were server
+      throw new Error(
+        "Authentication failed: " + (authError?.message ?? "User not found"),
+      );
+    }
+
+    const updateData: {
+      username?: string;
+      email?: string;
+      profile_image_url?: string;
+    } = {};
+
+    if (updates.username !== undefined) {
+      updateData.username = updates.username;
+    }
+    if (updates.email !== undefined) {
+      updateData.email = updates.email;
+    }
+    if (updates.profileImageUrl !== undefined) {
+      updateData.profile_image_url = updates.profileImageUrl;
+    }
+
+    const { data, error } = await supabase
+      .from("user")
+      .update(updateData)
+      .eq("auth_id", authUser.id)
+      .select("uid, username, email, profile_image_url, created_at")
+      .single();
+
+    if (error || !data) {
+      throw new Error(
+        "Failed to update user: " + (error?.message ?? "Unknown error"),
+      );
+    }
+
+    return UserService.mapToUser(data);
+  }
+
+  /**
    * Gets an existing user or creates a new one.
    * If authId is provided, searches by auth_id first.
    * If email is provided and user not found by authId, searches by email.

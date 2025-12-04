@@ -4,8 +4,8 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import React, { useState, useCallback } from "react";
 import { Color, Sizing, SizingScale, StaticColor } from "@/constants/theme";
 import { Image } from "expo-image";
-import { signInWithApple, signInWithKakao, signInWithNaver } from "@/lib/oauth";
 import { X } from "lucide-react-native";
+import { useAuth } from "@/contexts/AuthContext";
 
 const PROVIDER_COLOR = {
   kakao: { text: "#1e1e1e", background: "#ffcd02" },
@@ -14,6 +14,7 @@ const PROVIDER_COLOR = {
 };
 
 export default function SignInScreenView() {
+  const { signInWithNaver, signInWithKakao, signInWithApple } = useAuth();
   const [loading, setLoading] = useState(false);
 
   const handleSignin = useCallback(
@@ -21,28 +22,30 @@ export default function SignInScreenView() {
       if (loading) return;
       try {
         setLoading(true);
+
+        let success: boolean;
         switch (provider) {
           case "naver":
-            await signInWithNaver();
+            success = await signInWithNaver();
             break;
           case "kakao":
-            await signInWithKakao();
+            success = await signInWithKakao();
             break;
           case "apple":
-            await signInWithApple();
+            success = await signInWithApple();
             break;
         }
 
-        router.back();
-      } catch (error) {
-        console.log(error);
-        Alert.alert("로그인 실패", "로그인 중 오류가 발생했습니다.");
+        if (success) {
+          router.back();
+        }
+      } catch {
+        Alert.alert("로그인 실패", "로그인에 실패하였습니다.");
       } finally {
-        // TODO: is not released with naver login cancel
         setLoading(false);
       }
     },
-    [loading],
+    [loading, signInWithApple, signInWithKakao, signInWithNaver],
   );
 
   return (
@@ -57,33 +60,33 @@ export default function SignInScreenView() {
         <Text style={styles.logoText}>리본</Text>
         <Text style={styles.sloganText}>인생의 모든 순간을 즐겁게</Text>
         <View style={styles.buttonView}>
-          <TouchableOpacity
-            style={[
-              styles.buttonBasic,
-              {
-                backgroundColor: PROVIDER_COLOR.naver.background,
-                opacity: loading ? 0.5 : 1,
-              },
-            ]}
-            disabled={loading}
-            activeOpacity={0.6}
-            onPress={handleSignin.bind(null, "naver")}
-          >
-            <Image
-              source={require("@/assets/logo/naver.svg")}
-              style={styles.buttonIcon}
-              contentFit="contain"
-              tintColor={PROVIDER_COLOR.naver.text}
-            />
-            <Text
-              style={[
-                styles.buttonTextBasic,
-                { color: PROVIDER_COLOR.naver.text },
-              ]}
-            >
-              네이버로 시작하기
-            </Text>
-          </TouchableOpacity>
+          {/*<TouchableOpacity*/}
+          {/*  style={[*/}
+          {/*    styles.buttonBasic,*/}
+          {/*    {*/}
+          {/*      backgroundColor: PROVIDER_COLOR.naver.background,*/}
+          {/*      opacity: loading ? 0.5 : 1,*/}
+          {/*    },*/}
+          {/*  ]}*/}
+          {/*  disabled={loading}*/}
+          {/*  activeOpacity={0.6}*/}
+          {/*  onPress={handleSignin.bind(null, "naver")}*/}
+          {/*>*/}
+          {/*  <Image*/}
+          {/*    source={require("@/assets/logo/naver.svg")}*/}
+          {/*    style={styles.buttonIcon}*/}
+          {/*    contentFit="contain"*/}
+          {/*    tintColor={PROVIDER_COLOR.naver.text}*/}
+          {/*  />*/}
+          {/*  <Text*/}
+          {/*    style={[*/}
+          {/*      styles.buttonTextBasic,*/}
+          {/*      { color: PROVIDER_COLOR.naver.text },*/}
+          {/*    ]}*/}
+          {/*  >*/}
+          {/*    네이버로 시작하기*/}
+          {/*  </Text>*/}
+          {/*</TouchableOpacity>*/}
           <TouchableOpacity
             style={[
               styles.buttonBasic,

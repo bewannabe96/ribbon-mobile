@@ -95,6 +95,7 @@ const styles = StyleSheet.create({
 
   titleText: {
     fontSize: 20,
+    lineHeight: 28,
     color: StaticColor.gray900,
     fontWeight: "500",
   },

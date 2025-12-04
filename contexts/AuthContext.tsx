@@ -1,99 +1,37 @@
 import {
   createContext,
   useContext,
-  useEffect,
   useState,
   useCallback,
   PropsWithChildren,
   useMemo,
 } from "react";
-import { AuthChangeEvent, Session } from "@supabase/supabase-js";
-import { supabase } from "@/lib/supabase";
-import { UserService, User } from "@/lib/services";
+import { User } from "@/lib/services";
+import Auth from "@/lib/auth";
 
 interface AuthContextType {
-  session: Session | null;
-  user: User | null;
   isInitialized: boolean;
-  isSignedIn: boolean;
-  initialize: () => Promise<void>;
-  signOut: () => Promise<void>;
+  setIsInitialized: (value: boolean) => void;
+
+  user: User | null;
+  setUser: (value: User | null) => void;
 }
 
-const AuthContext = createContext<AuthContextType>({
-  session: null,
-  user: null,
-  isInitialized: false,
-  isSignedIn: false,
-  initialize: async () => {},
-  signOut: async () => {},
-});
+const AuthContext = createContext<AuthContextType>({} as any);
 
 export function AuthProvider(props: PropsWithChildren) {
   const [isInitialized, setIsInitialized] = useState(false);
-  const [session, setSession] = useState<Session | null>(null);
+  // const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
-
-  const onSessionChange = useCallback(async (session: Session | null) => {
-    if (session === null) {
-      setUser(null);
-      return;
-    } else {
-      try {
-        const result = await UserService.getOrCreateUser();
-        setUser(result.user);
-      } catch (error) {
-        console.error("Sign in failed: " + error);
-      }
-    }
-  }, []);
-
-  useEffect(() => {
-    if (!isInitialized) return;
-
-    const { data } = supabase.auth.onAuthStateChange(
-      (_: AuthChangeEvent, session: Session | null) => setSession(session),
-    );
-    return () => data.subscription.unsubscribe();
-  }, [isInitialized]);
-
-  useEffect(() => {
-    onSessionChange(session).then();
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [session]);
-
-  const initialize = useCallback(async () => {
-    const { data, error } = await supabase.auth.getSession();
-
-    if (error) {
-      console.log(
-        "Initializing auth state failed: " +
-          (error?.message ?? "Unknown Error"),
-      );
-    }
-
-    setSession(data.session);
-    setIsInitialized(true);
-  }, []);
-
-  const signOut = useCallback(async () => {
-    await supabase.auth.signOut();
-  }, []);
-
-  const isSignedIn = useMemo(() => {
-    return session !== null && user !== null;
-  }, [session, user]);
 
   return (
     <AuthContext.Provider
       value={{
-        session: session,
-        user: user,
-        isInitialized: isInitialized,
-        isSignedIn: isSignedIn,
-        initialize: initialize,
-        signOut: signOut,
+        isInitialized,
+        setIsInitialized,
+
+        user,
+        setUser,
       }}
     >
       {props.children}
@@ -103,8 +41,61 @@ export function AuthProvider(props: PropsWithChildren) {
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
+
   if (!context) {
     throw new Error("useAuth must be used within an AuthProvider");
   }
-  return context;
+
+  const initialize = useCallback(async () => {
+    const user = await Auth.initializeAuth();
+    context.setUser(user);
+    context.setIsInitialized(true);
+  }, [context]);
+
+  const signInWithApple = useCallback(async (): Promise<boolean> => {
+    const user = await Auth.signInWithApple();
+
+    if (user === null) return false;
+
+    context.setUser(user);
+    return true;
+  }, [context]);
+
+  const signInWithNaver = useCallback(async (): Promise<boolean> => {
+    const user = await Auth.signInWithNaver();
+
+    if (user === null) return false;
+
+    // context.setUser(user)
+    return true;
+  }, []);
+
+  const signInWithKakao = useCallback(async (): Promise<boolean> => {
+    const user = await Auth.signInWithKakao();
+
+    if (user === null) return false;
+
+    context.setUser(user);
+    return true;
+  }, [context]);
+
+  const signOut = useCallback(async () => {
+    await Auth.signOut();
+    context.setUser(null);
+  }, [context]);
+
+  const isSignedIn = useMemo(() => {
+    return context.user !== null;
+  }, [context.user]);
+
+  return {
+    isInitialized: context.isInitialized,
+    user: context.user,
+    initialize,
+    signInWithApple,
+    signInWithNaver,
+    signInWithKakao,
+    signOut,
+    isSignedIn,
+  };
 };

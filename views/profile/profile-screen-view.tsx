@@ -3,21 +3,24 @@ import { useCallback } from "react";
 import * as WebBrowser from "expo-web-browser";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Section, SectionBody } from "@/components/ui/section";
-import { Color, Sizing, SizingScale } from "@/constants/theme";
+import { Color, Sizing, SizingScale, StaticColor } from "@/constants/theme";
 import Button from "@/components/ui/button";
 import { router } from "expo-router";
 import { useAuth } from "@/contexts/AuthContext";
 import { ChevronRight } from "lucide-react-native";
+import { Image } from "expo-image";
 
 export default function ProfileScreenView() {
   const { isSignedIn, user, signOut } = useAuth();
 
   const onTermsOfServicePressed = useCallback(async () => {
-    await WebBrowser.openBrowserAsync("https://www.naver.com");
+    const url = process.env.EXPO_TERMS_OF_SERVICE_URL;
+    if (url) await WebBrowser.openBrowserAsync(url);
   }, []);
 
   const onPrivacyPolicyPressed = useCallback(async () => {
-    await WebBrowser.openBrowserAsync("https://www.naver.com");
+    const url = process.env.EXPO_PRIVACY_POLICY_URL;
+    if (url) await WebBrowser.openBrowserAsync(url);
   }, []);
 
   const onSignOut = useCallback(() => {
@@ -25,7 +28,7 @@ export default function ProfileScreenView() {
       { text: "취소", style: "cancel" },
       { text: "확인", onPress: signOut },
     ]);
-  }, []);
+  }, [signOut]);
 
   return (
     <View style={styles.container}>
@@ -38,11 +41,20 @@ export default function ProfileScreenView() {
           <SectionBody>
             {user ? (
               <View style={styles.profileView}>
-                <View style={styles.usernameView}>
-                  <Text style={styles.usernameText}>{user.username}</Text>
-                  <Text style={styles.usernameSuffixText}>님</Text>
+                {user.profileImageUrl && (
+                  <Image
+                    style={styles.profileImage}
+                    source={user.profileImageUrl}
+                    contentFit="cover"
+                  />
+                )}
+                <View>
+                  <View style={styles.usernameView}>
+                    <Text style={styles.usernameText}>{user.username}</Text>
+                    <Text style={styles.usernameSuffixText}>님</Text>
+                  </View>
+                  <Text style={styles.usernameSuffixText}>안녕하세요!</Text>
                 </View>
-                <Text style={styles.usernameSuffixText}>안녕하세요!</Text>
               </View>
             ) : (
               <Button
@@ -119,7 +131,17 @@ const styles = StyleSheet.create({
   },
 
   profileView: {
+    flexDirection: "row",
     gap: SizingScale[1],
+    alignItems: "center",
+  },
+
+  profileImage: {
+    height: 64,
+    width: 64,
+    borderRadius: 64,
+    backgroundColor: StaticColor.gray100,
+    marginEnd: SizingScale[3],
   },
 
   usernameView: {
@@ -130,14 +152,14 @@ const styles = StyleSheet.create({
 
   usernameText: {
     fontSize: 24,
-    lineHeight: 28,
+    lineHeight: 26,
     fontWeight: "bold",
     fontFamily: "Pretendard",
   },
 
   usernameSuffixText: {
     fontSize: 20,
-    lineHeight: 28,
+    lineHeight: 26,
     fontFamily: "Pretendard",
   },
 

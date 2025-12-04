@@ -1,21 +1,21 @@
 module.exports = {
   expo: {
-    name: "Osso",
-    slug: "osso",
+    name: "Ribbon",
+    slug: "ribbon",
     version: "1.0.0",
     orientation: "portrait",
     icon: "./assets/images/icon.png",
-    scheme: "osso",
+    scheme: "ribbon",
     userInterfaceStyle: "automatic",
     newArchEnabled: true,
     ios: {
       supportsTablet: true,
-      bundleIdentifier: "dev.b1ob.osso",
+      bundleIdentifier: "dev.b1ob.ribbon",
       infoPlist: {
         ITSAppUsesNonExemptEncryption: false,
       },
       usesAppleSignIn: true,
-      buildNumber: "25112801",
+      buildNumber: "25120401",
     },
     android: {
       adaptiveIcon: {
@@ -25,7 +25,7 @@ module.exports = {
         monochromeImage: "./assets/images/android-icon-monochrome.png",
       },
       edgeToEdgeEnabled: true,
-      package: "dev.b1ob.osso",
+      package: "dev.b1ob.ribbon",
     },
     web: {
       output: "static",
