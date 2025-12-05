@@ -720,7 +720,7 @@ class EventService {
 
     let query = supabase
       .from("user_favorite")
-      .select("pe_id, created_at")
+      .select("id, pe_id, created_at")
       .eq("user_id", userId)
       .order("created_at", { ascending: false })
       .order("id", { ascending: false })
@@ -748,7 +748,7 @@ class EventService {
 
     const ids = records.map((row) => row.pe_id);
     const nextToken = hasMore
-      ? EventService.encodeCursor([lastRecord.created_at, lastRecord.pe_id])
+      ? EventService.encodeCursor([lastRecord.created_at, lastRecord.id])
       : null;
 
     const events = await EventService.applicationJoinEvent(ids);
@@ -785,7 +785,7 @@ class EventService {
 
     let query = supabase
       .from("user_event_view_history")
-      .select("pe_id, viewed_at")
+      .select("id, pe_id, viewed_at")
       .eq("user_id", userId)
       .order("viewed_at", { ascending: false })
       .order("id", { ascending: false })
@@ -813,7 +813,7 @@ class EventService {
 
     const ids = records.map((row) => row.pe_id);
     const nextToken = hasMore
-      ? EventService.encodeCursor([lastRecord.viewed_at, lastRecord.pe_id])
+      ? EventService.encodeCursor([lastRecord.viewed_at, lastRecord.id])
       : null;
 
     const events = await EventService.applicationJoinEvent(ids);

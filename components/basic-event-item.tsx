@@ -48,6 +48,7 @@ const infoRowStyles = StyleSheet.create({
 
 interface FullHeightEventItemProps {
   width?: DimensionValue;
+  preventViewRecord?: boolean;
 
   uuid: string;
   name: string;
@@ -82,7 +83,11 @@ export default function BasicEventItem(props: FullHeightEventItemProps) {
     <TouchableOpacity
       activeOpacity={0.6}
       style={[styles.container, { width: props.width }]}
-      onPress={() => router.push(`/event-detail/${props.uuid}`)}
+      onPress={() =>
+        router.push(
+          `/event-detail/${props.uuid}?prevent_view_record=${props.preventViewRecord}`,
+        )
+      }
     >
       {/* Badge & Like */}
       <View style={styles.header}>

@@ -58,7 +58,10 @@ export default function FavoriteEventsSection() {
         ))}
         {hasMore && (
           <View style={styles.buttonView}>
-            <Button label="더보기" />
+            <Button
+              label="전체보기"
+              onPress={() => router.push("/favorite-events")}
+            />
           </View>
         )}
       </SectionBody>

@@ -6,6 +6,7 @@ import { SizingScale } from "@/constants/theme";
 import { useRecentlyViewedEvents } from "@/views/profile/context/use-recently-viewed-events";
 import { useCallback } from "react";
 import { useAuth } from "@/contexts/AuthContext";
+import { router } from "expo-router";
 
 export default function RecentlyViewedEventsSection() {
   const { isSignedIn } = useAuth();
@@ -54,7 +55,10 @@ export default function RecentlyViewedEventsSection() {
         ))}
         {hasMore && (
           <View style={styles.buttonView}>
-            <Button label="더보기" />
+            <Button
+              label="전체보기"
+              onPress={() => router.push("/recently-viewed-events")}
+            />
           </View>
         )}
       </SectionBody>
