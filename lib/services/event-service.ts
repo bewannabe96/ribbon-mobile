@@ -357,6 +357,7 @@ class EventService {
       );
 
       return {
+        id: row.id,
         uuid: row.uuid,
         category: {
           value: row.category,
@@ -423,7 +424,9 @@ class EventService {
     );
 
     if (filterError || filterData === null) {
-      throw new Error("Error occurred while filtering events");
+      throw new Error(
+        "Error occurred while filtering events: " + filterError?.message,
+      );
     }
 
     if (filterData.length === 0) {
@@ -486,7 +489,10 @@ class EventService {
     const { data: filterData, error: filterError } = await query;
 
     if (filterError || filterData === null) {
-      throw new Error("Error occurred while fetching ongoing festivals");
+      throw new Error(
+        "Error occurred while fetching ongoing festivals: " +
+          filterError?.message,
+      );
     }
 
     if (filterData.length === 0) {
@@ -543,7 +549,10 @@ class EventService {
     const { data: filterData, error: filterError } = await query;
 
     if (filterError || filterData === null) {
-      throw new Error("Error occurred while fetching newly created events");
+      throw new Error(
+        "Error occurred while fetching newly created events: " +
+          filterError?.message,
+      );
     }
 
     if (filterData.length === 0) {
@@ -666,18 +675,16 @@ class EventService {
 
     const now = DateTime.now().toISO();
 
-    const { error } = await supabase
-      .from("user_event_view_history")
-      .upsert(
-        {
-          user_id: userId,
-          pe_id: eventId,
-          viewed_at: now,
-        },
-        {
-          onConflict: "user_id,pe_id",
-        }
-      );
+    const { error } = await supabase.from("user_event_view_history").upsert(
+      {
+        user_id: userId,
+        pe_id: eventId,
+        viewed_at: now,
+      },
+      {
+        onConflict: "user_id,pe_id",
+      },
+    );
 
     if (error) {
       throw new Error(`Failed to record event view: ${error.message}`);

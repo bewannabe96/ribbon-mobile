@@ -1,25 +1,34 @@
-import { useEffect } from "react";
+import { useCallback } from "react";
 import { useOperation } from "@/views/profile/context/use-operation";
 import { useAuth } from "@/contexts/AuthContext";
+import { useFocusEffect } from "expo-router";
+import { useLatest } from "@/hooks/use-latest";
 
 export function useScreenEffect() {
   const { isSignedIn } = useAuth();
   const {
-    fetchFavoriteEvents,
-    fetchRecentlyViewedEvents,
+    loadFavoriteEvents,
+    loadRecentlyViewedEvents,
     emptyFavoriteEvents,
     emptyRecentlyViewedEvents,
   } = useOperation();
 
-  useEffect(() => {
-    if (isSignedIn) {
-      fetchFavoriteEvents().then();
-      fetchRecentlyViewedEvents().then();
-    } else {
-      emptyFavoriteEvents();
-      emptyRecentlyViewedEvents();
-    }
+  const loadFavoriteEventsRef = useLatest(loadFavoriteEvents);
+  const loadRecentlyViewedEventsRef = useLatest(loadRecentlyViewedEvents);
+  const emptyFavoriteEventsRef = useLatest(emptyFavoriteEvents);
+  const emptyRecentlyViewedEventsRef = useLatest(emptyRecentlyViewedEvents);
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isSignedIn]);
+  useFocusEffect(
+    useCallback(() => {
+      if (isSignedIn) {
+        loadFavoriteEventsRef.current().then();
+        loadRecentlyViewedEventsRef.current().then();
+      } else {
+        emptyFavoriteEventsRef.current();
+        emptyRecentlyViewedEventsRef.current();
+      }
+
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isSignedIn]),
+  );
 }

@@ -23,7 +23,7 @@ export default function RecentlyViewedEventsSection() {
       );
     }
 
-    if (isLoading) {
+    if (recentlyViewedEvents === null || isLoading) {
       return (
         <SectionBody>
           <View style={styles.emptyView}>

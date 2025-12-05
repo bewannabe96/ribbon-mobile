@@ -2,6 +2,7 @@ import { createContext, ReactNode, useContext, useState } from "react";
 import { DateTime } from "luxon";
 
 export type ProfileEvent = {
+  id: number;
   uuid: string;
   title: string;
   periodStart: DateTime;
@@ -11,10 +12,14 @@ export type ProfileEvent = {
 };
 
 export type ProfileScreenContextValue = {
-  favoriteEvents: ProfileEvent[];
-  setFavoriteEvents: (value: ProfileEvent[]) => void;
-  recentlyViewedEvents: ProfileEvent[];
-  setRecentlyViewedEvents: (value: ProfileEvent[]) => void;
+  favoriteEvents: ProfileEvent[] | null;
+  setFavoriteEvents: (value: ProfileEvent[] | null) => void;
+  favoriteEventsLastLoadedAt: number;
+  setFavoriteEventsLastLoadedAt: (value: number) => void;
+  recentlyViewedEvents: ProfileEvent[] | null;
+  setRecentlyViewedEvents: (value: ProfileEvent[] | null) => void;
+  recentlyViewedEventsLastLoadedAt: number;
+  setRecentlyViewedEventsLastLoadedAt: (value: number) => void;
   isFavoriteLoading: boolean;
   setIsFavoriteLoading: (value: boolean) => void;
   isRecentlyViewedLoading: boolean;
@@ -34,10 +39,18 @@ type ProfileProviderProps = {
 };
 
 export function ProfileProvider({ children }: ProfileProviderProps) {
-  const [favoriteEvents, setFavoriteEvents] = useState<ProfileEvent[]>([]);
+  const [favoriteEvents, setFavoriteEvents] = useState<ProfileEvent[] | null>(
+    null,
+  );
+  const [favoriteEventsLastLoadedAt, setFavoriteEventsLastLoadedAt] =
+    useState(0);
   const [recentlyViewedEvents, setRecentlyViewedEvents] = useState<
-    ProfileEvent[]
-  >([]);
+    ProfileEvent[] | null
+  >(null);
+  const [
+    recentlyViewedEventsLastLoadedAt,
+    setRecentlyViewedEventsLastLoadedAt,
+  ] = useState(0);
   const [isFavoriteLoading, setIsFavoriteLoading] = useState(false);
   const [isRecentlyViewedLoading, setIsRecentlyViewedLoading] = useState(false);
   const [favoriteNextToken, setFavoriteNextToken] = useState<string | null>(
@@ -52,8 +65,12 @@ export function ProfileProvider({ children }: ProfileProviderProps) {
       value={{
         favoriteEvents,
         setFavoriteEvents,
+        favoriteEventsLastLoadedAt,
+        setFavoriteEventsLastLoadedAt,
         recentlyViewedEvents,
         setRecentlyViewedEvents,
+        recentlyViewedEventsLastLoadedAt,
+        setRecentlyViewedEventsLastLoadedAt,
         isFavoriteLoading,
         setIsFavoriteLoading,
         isRecentlyViewedLoading,

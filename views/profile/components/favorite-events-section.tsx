@@ -23,7 +23,7 @@ export default function FavoriteEventsSection() {
       );
     }
 
-    if (isLoading) {
+    if (favoriteEvents === null || isLoading) {
       return (
         <SectionBody>
           <View style={styles.emptyView}>

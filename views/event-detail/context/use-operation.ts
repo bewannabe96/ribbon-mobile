@@ -5,6 +5,7 @@ import {
 import { useCallback } from "react";
 import { EventService } from "@/lib/services";
 import { DateTime } from "luxon";
+import { useFavoriteEventsStore, useRecentlyViewedEventsStore } from "@/store";
 
 function calculateDayCount(
   startDate: DateTime,
@@ -41,6 +42,9 @@ export function useOperation() {
     setIsFavorite,
     isFavorite,
   } = useScreenContext();
+
+  const recentlyViewedEventsStore = useRecentlyViewedEventsStore();
+  const favoriteEventsStore = useFavoriteEventsStore();
 
   const loadEventDetail = useCallback(
     async (eventUuid: string) => {
@@ -135,22 +139,35 @@ export function useOperation() {
     if (eventDetail === null) return;
 
     try {
-      setIsFavorite(!isFavorite);
       if (isFavorite) {
+        setIsFavorite(false);
+        favoriteEventsStore.removeFavorite(eventDetail.uuid);
         await EventService.removeFavorite(eventDetail.uuid);
       } else {
+        setIsFavorite(true);
+        favoriteEventsStore.addFavorite(eventDetail.uuid);
         await EventService.addFavorite(eventDetail.uuid);
       }
     } catch (error) {
-      setIsFavorite(isFavorite);
+      if (isFavorite) {
+        setIsFavorite(true);
+        favoriteEventsStore.addFavorite(eventDetail.uuid);
+      } else {
+        setIsFavorite(false);
+        favoriteEventsStore.removeFavorite(eventDetail.uuid);
+      }
       console.log("Failed toggle favorite: " + error);
       throw error;
     }
-  }, [eventDetail, isFavorite, setIsFavorite]);
+  }, [eventDetail, favoriteEventsStore, isFavorite, setIsFavorite]);
 
-  const recordEventView = useCallback(async (eventUuid: string) => {
-    await EventService.recordEventView(eventUuid);
-  }, []);
+  const recordEventView = useCallback(
+    async (eventUuid: string) => {
+      await EventService.recordEventView(eventUuid);
+      recentlyViewedEventsStore.recordEventView(eventUuid);
+    },
+    [recentlyViewedEventsStore],
+  );
 
   return { loadEventDetail, toggleFavorite, recordEventView };
 }

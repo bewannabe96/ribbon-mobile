@@ -27,6 +27,7 @@ export type Venue = {
 };
 
 export interface Event {
+  id: number;
   uuid: string;
   category: { value: string; name: string };
   tags: { value: string; name: string }[];

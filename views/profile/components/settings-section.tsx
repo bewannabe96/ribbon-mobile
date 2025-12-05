@@ -7,7 +7,7 @@ import { useCallback } from "react";
 import * as WebBrowser from "expo-web-browser";
 
 export default function SettingsSection() {
-  const { isSignedIn, user, signOut } = useAuth();
+  const { isSignedIn, signOut } = useAuth();
 
   const onTermsOfServicePressed = useCallback(async () => {
     const url = process.env.EXPO_PUBLIC_TERMS_OF_SERVICE_URL;
