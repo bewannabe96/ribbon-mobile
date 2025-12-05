@@ -128,6 +128,6 @@ const styles = StyleSheet.create({
   },
 
   text: {
-    fontWeight: "bold",
+    fontWeight: 600,
   },
 });

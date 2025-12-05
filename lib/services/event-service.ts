@@ -5,6 +5,8 @@ import {
   SearchEventsResponseDto,
   GetOngoingFestivalsResponseDto,
   GetNewlyCreatedEventsResponseDto,
+  GetFavoriteEventsResponseDto,
+  GetViewHistoryResponseDto,
 } from "@/lib/services/dto";
 import { Event, RegistrationSession, TimetableSlot } from "./dto/common.dto";
 import { DateTime } from "luxon";
@@ -680,6 +682,136 @@ class EventService {
     if (error) {
       throw new Error(`Failed to record event view: ${error.message}`);
     }
+  }
+
+  /**
+   * Fetches the current user's favorite events with cursor-based pagination.
+   * Returns events ordered by favorite creation date (descending), then by id (descending).
+   * @param token - Pagination token
+   * @param limit - Number of events per page (default: 20)
+   * @throws Error if user is not authenticated
+   */
+  static async getFavoriteEvents(
+    token?: string | null,
+    limit: number = 20,
+  ): Promise<GetFavoriteEventsResponseDto> {
+    const userId = await EventService.getCurrentUserId();
+
+    if (userId === null) {
+      throw new Error("User not authenticated");
+    }
+
+    let createdAtCursor: string | undefined = undefined;
+    let idCursor: number | undefined = undefined;
+    if (token) {
+      const cursor = EventService.decodeCursor(token, 2);
+      if (cursor) {
+        createdAtCursor = cursor[0];
+        idCursor = Number(cursor[1]);
+      }
+    }
+
+    let query = supabase
+      .from("user_favorite")
+      .select("pe_id, created_at")
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false })
+      .order("id", { ascending: false })
+      .limit(limit + 1);
+
+    if (createdAtCursor && idCursor) {
+      query = query.or(
+        `created_at.lt.${createdAtCursor},and(created_at.eq.${createdAtCursor},id.lt.${idCursor})`,
+      );
+    }
+
+    const { data: filterData, error: filterError } = await query;
+
+    if (filterError || filterData === null) {
+      throw new Error("Error occurred while fetching favorite events");
+    }
+
+    if (filterData.length === 0) {
+      return { events: [], nextToken: null };
+    }
+
+    const hasMore = filterData.length > limit;
+    const records = filterData.slice(0, limit);
+    const lastRecord = records[records.length - 1];
+
+    const ids = records.map((row) => row.pe_id);
+    const nextToken = hasMore
+      ? EventService.encodeCursor([lastRecord.created_at, lastRecord.pe_id])
+      : null;
+
+    const events = await EventService.applicationJoinEvent(ids);
+
+    return { events, nextToken };
+  }
+
+  /**
+   * Fetches the current user's event view history with cursor-based pagination.
+   * Returns events ordered by last viewed date (descending), then by id (descending).
+   * @param token - Pagination token
+   * @param limit - Number of events per page (default: 20)
+   * @throws Error if user is not authenticated
+   */
+  static async getViewHistory(
+    token?: string | null,
+    limit: number = 20,
+  ): Promise<GetViewHistoryResponseDto> {
+    const userId = await EventService.getCurrentUserId();
+
+    if (userId === null) {
+      throw new Error("User not authenticated");
+    }
+
+    let viewedAtCursor: string | undefined = undefined;
+    let idCursor: number | undefined = undefined;
+    if (token) {
+      const cursor = EventService.decodeCursor(token, 2);
+      if (cursor) {
+        viewedAtCursor = cursor[0];
+        idCursor = Number(cursor[1]);
+      }
+    }
+
+    let query = supabase
+      .from("user_event_view_history")
+      .select("pe_id, viewed_at")
+      .eq("user_id", userId)
+      .order("viewed_at", { ascending: false })
+      .order("id", { ascending: false })
+      .limit(limit + 1);
+
+    if (viewedAtCursor && idCursor) {
+      query = query.or(
+        `viewed_at.lt.${viewedAtCursor},and(viewed_at.eq.${viewedAtCursor},id.lt.${idCursor})`,
+      );
+    }
+
+    const { data: filterData, error: filterError } = await query;
+
+    if (filterError || filterData === null) {
+      throw new Error("Error occurred while fetching event view history");
+    }
+
+    if (filterData.length === 0) {
+      return { events: [], nextToken: null };
+    }
+
+    const hasMore = filterData.length > limit;
+    const records = filterData.slice(0, limit);
+    const lastRecord = records[records.length - 1];
+
+    const ids = records.map((row) => row.pe_id);
+    const nextToken = hasMore
+      ? EventService.encodeCursor([lastRecord.viewed_at, lastRecord.pe_id])
+      : null;
+
+    const events = await EventService.applicationJoinEvent(ids);
+
+    return { events, nextToken };
   }
 }
 

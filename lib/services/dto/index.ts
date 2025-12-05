@@ -6,3 +6,5 @@ export type {
 export type { GetOngoingFestivalsResponseDto } from "./get-ongoing-festivals-response.dto";
 export type { GetNewlyCreatedEventsResponseDto } from "./get-newly-created-events-response.dto";
 export type { GetOrCreateUserResponseDto } from "./get-or-create-user.dto";
+export type { GetFavoriteEventsResponseDto } from "./get-favorite-events-response.dto";
+export type { GetViewHistoryResponseDto } from "./get-view-history-response.dto";
