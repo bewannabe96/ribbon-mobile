@@ -6,7 +6,6 @@ import {
   TextInput,
   Keyboard,
 } from "react-native";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
 import React, {
   useState,
   useMemo,
@@ -25,6 +24,7 @@ import {
 import type { BottomSheetBackdropProps } from "@gorhom/bottom-sheet";
 import { filterObjectsByJaso } from "@/lib/utils/korean-jaso-search";
 import Button from "@/components/ui/button";
+import { Check, Search, X } from "lucide-react-native";
 
 export type OptionItem = {
   label: string;
@@ -75,13 +75,7 @@ function SelectionItem({ item, isSelected, onPress }: SelectionItemProps) {
       >
         {item.label}
       </Text>
-      {isSelected && (
-        <MaterialCommunityIcons
-          name="check"
-          color={Color.background}
-          size={20}
-        />
-      )}
+      {isSelected && <Check size={20} color={Color.background} />}
     </TouchableOpacity>
   );
 }
@@ -216,7 +210,7 @@ function FlowContent(
         <View style={styles.modalHeader}>
           <Text style={styles.headerText}>{props.title}</Text>
           <TouchableOpacity onPress={handleClose}>
-            <MaterialCommunityIcons name="close" color={Color.text} size={24} />
+            <X color={Color.text} size={24} />
           </TouchableOpacity>
         </View>
 
@@ -224,11 +218,7 @@ function FlowContent(
         {props.allowSearch && (
           <View style={styles.searchView}>
             <View style={styles.searchContainer}>
-              <MaterialCommunityIcons
-                name="magnify"
-                color={Color.text}
-                size={20}
-              />
+              <Search color={Color.text} size={20} />
               <TextInput
                 style={styles.searchInput}
                 placeholder="검색"

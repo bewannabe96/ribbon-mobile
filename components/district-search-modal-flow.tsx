@@ -6,7 +6,6 @@ import {
   TextInput,
   Keyboard,
 } from "react-native";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
 import React, {
   useState,
   useMemo,
@@ -31,6 +30,7 @@ import {
   getLevelTwoDistrictsByIds,
   searchDistricts,
 } from "@/lib/utils/district";
+import { Check, Search, X } from "lucide-react-native";
 
 type DistrictSearchModalFlowProps = {};
 
@@ -122,13 +122,7 @@ function LevelTwoDistrictItem(props: LevelTwoDistrictItemProps) {
         >
           {props.name}
         </Text>
-        {props.isSelected && (
-          <MaterialCommunityIcons
-            name="check"
-            size={16}
-            color={StaticColor.indigo600}
-          />
-        )}
+        {props.isSelected && <Check size={16} color={StaticColor.indigo600} />}
       </View>
     </TouchableOpacity>
   );
@@ -185,13 +179,7 @@ function SearchResultItem(props: SearchResultItemProps) {
           </Text>
           <Text style={searchResultItemStyles.districtText}>{props.name}</Text>
         </View>
-        {props.isSelected && (
-          <MaterialCommunityIcons
-            name="check"
-            size={20}
-            color={StaticColor.indigo600}
-          />
-        )}
+        {props.isSelected && <Check size={20} color={StaticColor.indigo600} />}
       </View>
     </TouchableOpacity>
   );
@@ -326,18 +314,14 @@ function FlowContent(
         <View style={styles.modalHeader}>
           <Text style={styles.headerText}>지역</Text>
           <TouchableOpacity onPress={handleClose}>
-            <MaterialCommunityIcons name="close" color={Color.text} size={24} />
+            <X color={Color.text} size={24} />
           </TouchableOpacity>
         </View>
 
         {/* Search Input */}
         <View style={styles.searchView}>
           <View style={styles.searchContainer}>
-            <MaterialCommunityIcons
-              name="magnify"
-              color={StaticColor.gray400}
-              size={20}
-            />
+            <Search color={Color.text} size={20} />
             <TextInput
               style={styles.searchInput}
               placeholder="검색"
