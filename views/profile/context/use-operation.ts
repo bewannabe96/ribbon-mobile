@@ -91,6 +91,7 @@ export function useOperation() {
       setIsRecentlyViewedLoading(false);
     }
   }, [
+    recentlyViewedEvents,
     recentlyViewedEventsLastLoadedAt,
     recentlyViewedEventsStore.lastUpdatedAt,
     setIsRecentlyViewedLoading,

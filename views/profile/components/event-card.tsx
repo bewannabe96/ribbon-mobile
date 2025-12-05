@@ -41,7 +41,9 @@ export default function EventCard(props: EventCardProps) {
     <>
       <TouchableOpacity
         style={styles.container}
-        onPress={() => router.push(`/event-detail/${props.uuid}`)}
+        onPress={() =>
+          router.push(`/event-detail/${props.uuid}?prevent_view_record=true`)
+        }
         activeOpacity={0.6}
       >
         <View style={styles.eventInfo}>
