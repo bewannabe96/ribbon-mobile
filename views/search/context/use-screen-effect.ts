@@ -3,11 +3,31 @@ import { useEffect } from "react";
 import { useOperation } from "@/views/search/context/use-operation";
 
 export function useScreenEffect() {
-  const { filter } = useScreenContext();
-  const { search } = useOperation();
+  const { filter, isFilterLoaded } = useScreenContext();
+  const { search, loadFilters, saveFilters } = useOperation();
 
+  // Load saved filters on mount
   useEffect(() => {
-    search().then();
+    loadFilters().then();
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filter]);
+  }, []);
+
+  // Save filters whenever they change (after initial load)
+  useEffect(() => {
+    if (isFilterLoaded) {
+      saveFilters(filter).then();
+    }
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filter, isFilterLoaded]);
+
+  // Trigger search when filter changes (after initial load)
+  useEffect(() => {
+    if (isFilterLoaded) {
+      search().then();
+    }
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filter, isFilterLoaded]);
 }

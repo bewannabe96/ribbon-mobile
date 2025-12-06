@@ -4,12 +4,10 @@ import RecommendHeader from "./components/recommend-header";
 import EventSection from "./components/event-section";
 import { useScreenEffect } from "@/views/recommend/context/use-screen-effect";
 import { useRecommendScreenView } from "@/views/recommend/context/use-recommend-screen-view";
-import { useAuth } from "@/contexts/AuthContext";
 
 export default function RecommendScreenView() {
   useScreenEffect();
 
-  const { user } = useAuth();
   const { customEvents, ongoingEvents, newEvents, isLoading } =
     useRecommendScreenView();
 
@@ -32,12 +30,10 @@ export default function RecommendScreenView() {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        {user !== null && (
-          <EventSection
-            title={`"${user.username}"님을 위한\n맞춤 프로그램`}
-            events={customEvents}
-          />
-        )}
+        <EventSection
+          title="회원님을 위한 맞춤 프로그램"
+          events={customEvents}
+        />
         <EventSection title="진행 중인 행사 및 축제" events={ongoingEvents} />
         <EventSection title="새로 등록된 프로그램" events={newEvents} />
       </ScrollView>

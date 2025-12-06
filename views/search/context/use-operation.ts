@@ -7,6 +7,7 @@ import {
 } from "@/views/search/context/search-screen-context";
 import { SearchEventsFilters } from "@/lib/services/dto";
 import { DateTime } from "luxon";
+import Storage from "@/lib/storage";
 
 function mapEventToSearchItem(event: Event): SearchItem {
   const registrationSession = event.registrationSessions[0];
@@ -83,12 +84,35 @@ export function useOperation() {
     setIsSearching,
     isSearching,
     filter,
+    dispatchFilter,
+    setIsFilterLoaded,
   } = useScreenContext();
 
   const searchFilters = useMemo(
     () => convertToSearchEventsFilters(filter),
     [filter],
   );
+
+  const saveFilters = useCallback(async (filters: SearchFilter) => {
+    try {
+      await Storage.setSearchFilters(filters);
+    } catch (e) {
+      console.error("Failed to save search filters:", e);
+    }
+  }, []);
+
+  const loadFilters = useCallback(async () => {
+    try {
+      const savedFilters = await Storage.getSearchFilters();
+      if (savedFilters !== null) {
+        dispatchFilter({ type: "SET_ALL", payload: savedFilters });
+      }
+    } catch (e) {
+      console.error("Failed to load search filters:", e);
+    } finally {
+      setIsFilterLoaded(true);
+    }
+  }, [dispatchFilter, setIsFilterLoaded]);
 
   const search = useCallback(async () => {
     if (isSearching) return;
@@ -128,5 +152,7 @@ export function useOperation() {
   return {
     search,
     loadNextPage,
+    saveFilters,
+    loadFilters,
   };
 }

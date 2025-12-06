@@ -1,4 +1,3 @@
-- 조회이력 저장 후 개인화에 사용하기
 - mixpanel
 - 텍스트 전부 pretendard
 - 버튼 hitbox 키우기

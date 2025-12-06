@@ -6,6 +6,9 @@ import {
 import { DateTime } from "luxon";
 import { EventService } from "@/lib/services";
 import { Event } from "@/lib/services/dto/common.dto";
+import Storage from "@/lib/storage";
+import { SearchEventsFilters } from "@/lib/services/dto";
+import { SearchFilter } from "@/views/search/context/search-screen-context";
 
 function mapEventToRecommendEvent(event: Event): RecommendEvent {
   const registrationSession = event.registrationSessions[0];
@@ -30,6 +33,42 @@ function mapEventToRecommendEvent(event: Event): RecommendEvent {
   };
 }
 
+function convertToSearchEventsFilters(
+  filter: SearchFilter,
+): SearchEventsFilters {
+  const filters: SearchEventsFilters = {};
+
+  if (filter.categories.length > 0) {
+    filters.categories = filter.categories as any[];
+  }
+
+  if (filter.districts.length > 0) {
+    filters.districts = filter.districts;
+  }
+
+  if (filter.minFee !== null) {
+    filters.minParticipationFee = filter.minFee;
+  }
+
+  if (filter.maxFee !== null) {
+    filters.maxParticipationFee = filter.maxFee;
+  }
+
+  if (filter.tags.length > 0) {
+    filters.tags = filter.tags;
+  }
+
+  if (filter.status !== null) {
+    filters.registrationStatus = filter.status;
+  }
+
+  if (filter.residenceOnly) {
+    filters.targetResidencesDistrict = filter.districts;
+  }
+
+  return filters;
+}
+
 export function useOperation() {
   const { setCustomEvents, setOngoingEvents, setNewEvents, setIsLoading } =
     useScreenContext();
@@ -38,22 +77,65 @@ export function useOperation() {
     try {
       setIsLoading(true);
 
-      // API 호출
-      const [personalizedData, ongoingData, newData] = await Promise.all([
-        EventService.searchEvents(null, {}, 10),
+      // Load saved search filters from storage
+      const savedFilters = await Storage.getSearchFilters();
+
+      // Prepare filters for personalized events with "opened" status
+      let personalizedFilters: SearchEventsFilters;
+
+      if (savedFilters !== null) {
+        personalizedFilters = convertToSearchEventsFilters(savedFilters);
+        personalizedFilters.registrationStatus = "opened";
+      } else {
+        personalizedFilters = { registrationStatus: "opened" };
+      }
+
+      // Load personalized events with filters
+      const personalizedData = await EventService.searchEvents(
+        null,
+        personalizedFilters,
+        10,
+      );
+
+      let personalizedEvents = personalizedData.events.map(
+        mapEventToRecommendEvent,
+      );
+
+      // If less than 10 events, fill remaining slots with random "opened" events
+      if (personalizedEvents.length < 10) {
+        const remaining = 10 - personalizedEvents.length;
+        const randomData = await EventService.searchEvents(
+          null,
+          { registrationStatus: "opened" },
+          100,
+        );
+
+        // Get event UUIDs to exclude already selected ones
+        const selectedUuids = new Set(personalizedEvents.map((e) => e.uuid));
+
+        // Filter out already selected events and shuffle
+        const availableEvents = randomData.events.filter(
+          (event) => !selectedUuids.has(event.uuid),
+        );
+
+        const shuffled = availableEvents
+          .map((event) => ({ event, sort: Math.random() }))
+          .sort((a, b) => a.sort - b.sort)
+          .map(({ event }) => event)
+          .slice(0, remaining);
+
+        const additionalEvents = shuffled.map(mapEventToRecommendEvent);
+        personalizedEvents = [...personalizedEvents, ...additionalEvents];
+      }
+
+      // Load other sections in parallel
+      const [ongoingData, newData] = await Promise.all([
         EventService.getOngoingFestivals(null, 10),
         EventService.getNewlyCreatedEvents(null, 10),
       ]);
 
-      const personalizedEvents = personalizedData.events.map((event, index) =>
-        mapEventToRecommendEvent(event),
-      );
-      const ongoingEvents = ongoingData.events.map((event, index) =>
-        mapEventToRecommendEvent(event),
-      );
-      const newEvents = newData.events.map((event, index) =>
-        mapEventToRecommendEvent(event),
-      );
+      const ongoingEvents = ongoingData.events.map(mapEventToRecommendEvent);
+      const newEvents = newData.events.map(mapEventToRecommendEvent);
 
       setCustomEvents(personalizedEvents);
       setOngoingEvents(ongoingEvents);

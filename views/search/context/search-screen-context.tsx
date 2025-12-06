@@ -39,6 +39,7 @@ export type FilterAction =
   | { type: "SET_TAGS"; payload: string[] }
   | { type: "SET_STATUS"; payload: "upcoming" | "opened" | null }
   | { type: "SET_TARGET"; payload: string[] }
+  | { type: "SET_ALL"; payload: SearchFilter }
   | { type: "RESET" };
 
 export type SearchScreenContextValue = {
@@ -50,6 +51,8 @@ export type SearchScreenContextValue = {
   setIsSearching: (value: boolean) => void;
   nextToken: string | null;
   setNextToken: (value: string | null) => void;
+  isFilterLoaded: boolean;
+  setIsFilterLoaded: (value: boolean) => void;
 };
 
 export const SearchScreenContext = createContext<
@@ -90,6 +93,8 @@ function filterReducer(
         ...state,
         residenceOnly: action.payload.includes("residence_only"),
       };
+    case "SET_ALL":
+      return action.payload;
     case "RESET":
       return initialFilterState;
     default:
@@ -105,6 +110,7 @@ export function SearchProvider({ children }: SearchProviderProps) {
   const [searchItems, setSearchItems] = useState<SearchItem[]>([]);
   const [nextToken, setNextToken] = useState<string | null>(null);
   const [isSearching, setIsSearching] = useState(false);
+  const [isFilterLoaded, setIsFilterLoaded] = useState(false);
 
   return (
     <SearchScreenContext.Provider
@@ -117,6 +123,8 @@ export function SearchProvider({ children }: SearchProviderProps) {
         setIsSearching,
         nextToken,
         setNextToken,
+        isFilterLoaded,
+        setIsFilterLoaded,
       }}
     >
       {children}
