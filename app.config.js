@@ -15,7 +15,7 @@ module.exports = {
         ITSAppUsesNonExemptEncryption: false,
       },
       usesAppleSignIn: true,
-      buildNumber: "25120401",
+      buildNumber: "25120701",
     },
     android: {
       adaptiveIcon: {

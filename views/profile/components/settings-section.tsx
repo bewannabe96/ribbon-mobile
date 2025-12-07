@@ -19,6 +19,11 @@ export default function SettingsSection() {
     if (url) await WebBrowser.openBrowserAsync(url);
   }, []);
 
+  const onFeedbackPressed = useCallback(async () => {
+    const url = process.env.EXPO_PUBLIC_FEEDBACK_URL;
+    if (url) await WebBrowser.openBrowserAsync(url);
+  }, []);
+
   const onSignOut = useCallback(() => {
     Alert.alert("로그아웃", "정말로 로그아웃 하시겠습니까?", [
       { text: "취소", style: "cancel" },
@@ -43,11 +48,11 @@ export default function SettingsSection() {
           <Text style={styles.listButtonText}>개인정보처리 방침</Text>
           <ChevronRight size={20} color={Color.text} />
         </TouchableOpacity>
-        <TouchableOpacity style={styles.listButton}>
-          <Text style={styles.listButtonText}>고객센터</Text>
-          <ChevronRight size={20} color={Color.text} />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.listButton}>
+        {/*<TouchableOpacity style={styles.listButton}>*/}
+        {/*  <Text style={styles.listButtonText}>고객센터</Text>*/}
+        {/*  <ChevronRight size={20} color={Color.text} />*/}
+        {/*</TouchableOpacity>*/}
+        <TouchableOpacity style={styles.listButton} onPress={onFeedbackPressed}>
           <Text style={styles.listButtonText}>피드백</Text>
           <ChevronRight size={20} color={Color.text} />
         </TouchableOpacity>
