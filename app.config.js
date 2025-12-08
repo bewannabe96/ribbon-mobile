@@ -9,13 +9,13 @@ module.exports = {
     userInterfaceStyle: "automatic",
     newArchEnabled: true,
     ios: {
-      supportsTablet: true,
+      supportsTablet: false,
       bundleIdentifier: "dev.b1ob.ribbon",
       infoPlist: {
         ITSAppUsesNonExemptEncryption: false,
       },
       usesAppleSignIn: true,
-      buildNumber: "25120701",
+      buildNumber: "25120802",
     },
     android: {
       adaptiveIcon: {
@@ -26,6 +26,7 @@ module.exports = {
       },
       edgeToEdgeEnabled: true,
       package: "dev.b1ob.ribbon",
+      versionCode: "25120802",
     },
     plugins: [
       [

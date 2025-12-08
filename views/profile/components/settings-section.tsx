@@ -1,4 +1,11 @@
-import { Alert, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import {
+  Alert,
+  Linking,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { Section } from "@/components/ui/section";
 import { Color, Sizing, SizingScale } from "@/constants/theme";
 import { ChevronRight } from "lucide-react-native";
@@ -22,6 +29,11 @@ export default function SettingsSection() {
   const onFeedbackPressed = useCallback(async () => {
     const url = process.env.EXPO_PUBLIC_FEEDBACK_URL;
     if (url) await WebBrowser.openBrowserAsync(url);
+  }, []);
+
+  const onCustomerServicePressed = useCallback(async () => {
+    const url = process.env.EXPO_PUBLIC_CUSTOMER_SERVICE_URL;
+    if (url) await Linking.openURL(url);
   }, []);
 
   const onSignOut = useCallback(() => {
@@ -48,10 +60,13 @@ export default function SettingsSection() {
           <Text style={styles.listButtonText}>개인정보처리 방침</Text>
           <ChevronRight size={20} color={Color.text} />
         </TouchableOpacity>
-        {/*<TouchableOpacity style={styles.listButton}>*/}
-        {/*  <Text style={styles.listButtonText}>고객센터</Text>*/}
-        {/*  <ChevronRight size={20} color={Color.text} />*/}
-        {/*</TouchableOpacity>*/}
+        <TouchableOpacity
+          style={styles.listButton}
+          onPress={onCustomerServicePressed}
+        >
+          <Text style={styles.listButtonText}>고객센터</Text>
+          <ChevronRight size={20} color={Color.text} />
+        </TouchableOpacity>
         <TouchableOpacity style={styles.listButton} onPress={onFeedbackPressed}>
           <Text style={styles.listButtonText}>피드백</Text>
           <ChevronRight size={20} color={Color.text} />
