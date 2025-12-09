@@ -8,6 +8,7 @@ import { initializeKakaoSDK } from "@react-native-kakao/core";
 initializeKakaoSDK(process.env.EXPO_PUBLIC_KAKAO_APP_KEY || "").then();
 
 type KakaoJwtPayload = {
+  email: string;
   nickname: string;
   picture: string;
 } & JwtPayload;
@@ -34,12 +35,12 @@ export async function signInWithKakao(): Promise<User | null> {
   }
 
   // email
-  const proxyEmail = `${sub}@kakao.proxy.com`;
+  const email = decoded.email;
 
   // password
   const hash = new Sha256();
   hash.update(`${aud}::${sub}`);
-  const proxyPassword = Array.from(await hash.digest())
+  const password = Array.from(await hash.digest())
     .map((b) => ("00" + b.toString(16)).slice(-2))
     .join("");
 
@@ -54,7 +55,7 @@ export async function signInWithKakao(): Promise<User | null> {
   // profile image url
   const profileImageUrl = decoded.picture.replace("http://", "https://");
 
-  const credentials = { email: proxyEmail, password: proxyPassword };
+  const credentials = { email, password };
 
   const { data, error } = await supabase.auth.signInWithPassword(credentials);
   let supabaseUser = data.user;
