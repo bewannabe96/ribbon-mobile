@@ -1,6 +1,6 @@
 import * as SecureStore from "expo-secure-store";
 import { createClient, processLock } from "@supabase/supabase-js";
-import { Database } from "@/supabase/database/types";
+import { Database } from "@/lib/supabase-types";
 
 const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL || "";
 const supabasePublishableKey =

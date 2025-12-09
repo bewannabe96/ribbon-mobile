@@ -84,6 +84,11 @@ export const useAuth = () => {
     context.setUser(null);
   }, [context]);
 
+  const deleteAccount = useCallback(async () => {
+    await Auth.deleteAccount();
+    context.setUser(null);
+  }, [context]);
+
   const isSignedIn = useMemo(() => {
     return context.user !== null;
   }, [context.user]);
@@ -96,6 +101,7 @@ export const useAuth = () => {
     signInWithNaver,
     signInWithKakao,
     signOut,
+    deleteAccount,
     isSignedIn,
   };
 };

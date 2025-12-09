@@ -6,6 +6,7 @@ import { signInWithApple } from "./sign-in-with-apple";
 import { signInWithNaver } from "./sign-in-with-naver";
 import { signInWithKakao } from "./sign-in-with-kakao";
 import { signOut } from "./sign-out";
+import { deleteAccount } from "./delete-account";
 
 // Tells Supabase Auth to continuously refresh the session automatically
 // if the app is in the foreground. When this is added, you will continue
@@ -26,6 +27,7 @@ const Auth = {
   signInWithNaver,
   signInWithKakao,
   signOut,
+  deleteAccount,
 };
 
 export default Auth;

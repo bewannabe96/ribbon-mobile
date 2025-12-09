@@ -1,14 +1,36 @@
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import {
+  Alert,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Color, Sizing, SizingScale } from "@/constants/theme";
+import { Color, Sizing, SizingScale, StaticColor } from "@/constants/theme";
 import ProfileSection from "./components/profile-section";
 import FavoriteEventsSection from "./components/favorite-events-section";
 import RecentlyViewedEventsSection from "./components/recently-viewed-events-section";
 import SettingsSection from "./components/settings-section";
 import { useScreenEffect } from "./context/use-screen-effect";
+import { useAuth } from "@/contexts/AuthContext";
+import { useCallback } from "react";
 
 export default function ProfileScreenView() {
   useScreenEffect();
+
+  const { isSignedIn, deleteAccount } = useAuth();
+
+  const onDeleteAccount = useCallback(() => {
+    Alert.alert(
+      "회원탈퇴",
+      "정말로 탈퇴하시겠습니까?\n\n모든 데이터가 영구적으로 삭제되며, 이 작업은 되돌릴 수 없습니다.",
+      [
+        { text: "취소", style: "cancel" },
+        { text: "탈퇴하기", style: "destructive", onPress: deleteAccount },
+      ],
+    );
+  }, [deleteAccount]);
 
   return (
     <View style={styles.container}>
@@ -24,6 +46,15 @@ export default function ProfileScreenView() {
         <FavoriteEventsSection />
         <RecentlyViewedEventsSection />
         <SettingsSection />
+        {isSignedIn && (
+          <TouchableOpacity
+            style={styles.deleteAccountButton}
+            activeOpacity={0.6}
+            onPress={onDeleteAccount}
+          >
+            <Text style={styles.deleteAccountText}>회원탈퇴</Text>
+          </TouchableOpacity>
+        )}
       </ScrollView>
     </View>
   );
@@ -58,5 +89,18 @@ const styles = StyleSheet.create({
     paddingHorizontal: Sizing.screenPaddingX,
     paddingVertical: SizingScale[5],
     gap: SizingScale[4],
+  },
+
+  deleteAccountButton: {
+    alignSelf: "center",
+    padding: SizingScale[4],
+    marginTop: SizingScale[10],
+  },
+
+  deleteAccountText: {
+    fontSize: 16,
+    textDecorationLine: "underline",
+    fontFamily: "Pretendard",
+    color: StaticColor.gray400,
   },
 });
