@@ -40,13 +40,14 @@ export function EventDetailHeader() {
                 fill={isFavorite ? StaticColor.red500 : "transparent"}
               />
             </TouchableOpacity>
-            <TouchableOpacity
-              onPress={handleShare}
-              style={styles.headerButton}
-              activeOpacity={0.6}
-            >
-              <Share2 size={26} color={StaticColor.gray900} />
-            </TouchableOpacity>
+            {/* TODO: hide temporarily */}
+            {/*<TouchableOpacity*/}
+            {/*  onPress={handleShare}*/}
+            {/*  style={styles.headerButton}*/}
+            {/*  activeOpacity={0.6}*/}
+            {/*>*/}
+            {/*  <Share2 size={26} color={StaticColor.gray900} />*/}
+            {/*</TouchableOpacity>*/}
           </View>
         )}
       </View>
