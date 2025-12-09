@@ -82,7 +82,7 @@ class UserService {
   private static mapToUser(data: {
     uid: string;
     username: string;
-    email: string | null;
+    email: string;
     profile_image_url: string | null;
     created_at: string;
   }): User {
@@ -156,7 +156,9 @@ class UserService {
    * If no user is found, creates a new user with randomly generated username.
    * @returns User information and whether the user is newly created
    */
-  static async getOrCreateUser(): Promise<GetOrCreateUserResponseDto> {
+  static async getOrCreateUser(
+    email: string,
+  ): Promise<GetOrCreateUserResponseDto> {
     // mimics access token parsing
     const { data: authData, error: authError } = await supabase.auth.getUser();
     const authUser = authData.user;
@@ -187,7 +189,7 @@ class UserService {
 
     const { data, error } = await supabase
       .from("user")
-      .insert({ uid, username })
+      .insert({ uid, username, email })
       .select("uid, username, email, profile_image_url, created_at")
       .single();
 

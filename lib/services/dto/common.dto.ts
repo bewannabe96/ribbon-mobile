@@ -65,7 +65,7 @@ export interface EventDetail {
 export interface User {
   uid: string;
   username: string;
-  email: string | null;
+  email: string;
   profileImageUrl: string | null;
   createdAt: string;
 }

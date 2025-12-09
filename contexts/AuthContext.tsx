@@ -7,6 +7,7 @@ import {
   useMemo,
 } from "react";
 import { User } from "@/lib/services";
+import { analytics } from "@/lib";
 import Auth from "@/lib/auth";
 
 interface AuthContextType {
@@ -82,11 +83,13 @@ export const useAuth = () => {
   const signOut = useCallback(async () => {
     await Auth.signOut();
     context.setUser(null);
+    analytics.reset();
   }, [context]);
 
   const deleteAccount = useCallback(async () => {
     await Auth.deleteAccount();
     context.setUser(null);
+    analytics.reset();
   }, [context]);
 
   const isSignedIn = useMemo(() => {

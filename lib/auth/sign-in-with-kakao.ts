@@ -4,6 +4,7 @@ import { Sha256 } from "@aws-crypto/sha256-js";
 import { supabase } from "@/lib/supabase";
 import { User, UserService } from "@/lib/services";
 import { initializeKakaoSDK } from "@react-native-kakao/core";
+import { analytics } from "@/lib";
 
 initializeKakaoSDK(process.env.EXPO_PUBLIC_KAKAO_APP_KEY || "").then();
 
@@ -76,15 +77,29 @@ export async function signInWithKakao(): Promise<User | null> {
   }
 
   if (supabaseUser === null) {
-    throw new Error("Supabase user not found");
+    throw new Error("Error while signing in: User does not exist");
+  } else if (supabaseUser.email === undefined) {
+    throw new Error("Error while signing in: User email does not exist");
   }
 
   try {
-    const result = await UserService.getOrCreateUser();
+    const result = await UserService.getOrCreateUser(supabaseUser.email);
+
     let user = result.user;
     if (result.isNew) {
-      user = await UserService.updateUser({ username, profileImageUrl });
+      user = await UserService.updateUser({
+        username: username,
+        profileImageUrl: profileImageUrl,
+      });
     }
+
+    await analytics.identifyUser(
+      user.uid,
+      user.username,
+      user.email,
+      user.profileImageUrl,
+    );
+
     return user;
   } catch (error) {
     console.log("Error while fetching user data: " + error);

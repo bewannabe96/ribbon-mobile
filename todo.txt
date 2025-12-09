@@ -1,4 +1,3 @@
-- mixpanel
 - 헤더 튀는 현상 잡기
 ---
 - 텍스트 전부 pretendard

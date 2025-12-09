@@ -504,7 +504,7 @@ export type Database = {
         Row: {
           auth_id: string | null;
           created_at: string;
-          email: string | null;
+          email: string;
           id: number;
           is_deleted: boolean;
           profile_image_url: string | null;
@@ -515,7 +515,7 @@ export type Database = {
         Insert: {
           auth_id?: string | null;
           created_at?: string;
-          email?: string | null;
+          email?: string;
           id?: number;
           is_deleted?: boolean;
           profile_image_url?: string | null;
@@ -526,7 +526,7 @@ export type Database = {
         Update: {
           auth_id?: string | null;
           created_at?: string;
-          email?: string | null;
+          email?: string;
           id?: number;
           is_deleted?: boolean;
           profile_image_url?: string | null;

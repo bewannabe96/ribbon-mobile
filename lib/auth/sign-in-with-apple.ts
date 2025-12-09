@@ -2,6 +2,7 @@ import * as AppleAuthentication from "expo-apple-authentication";
 import { CodedError } from "expo-modules-core";
 import { supabase } from "@/lib/supabase";
 import { User, UserService } from "@/lib/services";
+import { analytics } from "@/lib";
 
 export async function signInWithApple(): Promise<User | null> {
   let identityToken: string | null = null;
@@ -36,10 +37,20 @@ export async function signInWithApple(): Promise<User | null> {
     throw new Error("Error while signing in: " + error.message);
   } else if (data.user === null) {
     throw new Error("Error while signing in: User does not exist");
+  } else if (data.user.email === undefined) {
+    throw new Error("Error while signing in: User email does not exist");
   }
 
   try {
-    const result = await UserService.getOrCreateUser();
+    const result = await UserService.getOrCreateUser(data.user.email);
+
+    await analytics.identifyUser(
+      result.user.uid,
+      result.user.username,
+      result.user.email,
+      result.user.profileImageUrl,
+    );
+
     return result.user;
   } catch (error) {
     console.error("Error while fetching user data: " + error);
