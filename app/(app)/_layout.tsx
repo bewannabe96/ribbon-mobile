@@ -17,8 +17,11 @@ export default function AppLayout() {
   const isLoading = useMemo(() => !isInitialized, [isInitialized]);
 
   useEffect(() => {
-    analytics.initialize().then();
-    initializeAuth().then();
+    Promise.all([
+      new Promise((resolve) => setTimeout(resolve, 1000)),
+      analytics.initialize(),
+      initializeAuth(),
+    ]).then();
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
