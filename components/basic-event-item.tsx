@@ -73,8 +73,8 @@ export default function BasicEventItem(props: FullHeightEventItemProps) {
   }, [props.eventStart, props.eventEnd]);
 
   const participationFeeText = useMemo(() => {
-    if (!props.participationFee) return null;
-    if (props.participationFee === 0) return "무료";
+    if (props.participationFee === null) return null;
+    else if (props.participationFee === 0) return "무료";
     else if (props.participationFee === -1) return "유료";
     return props.participationFee.toLocaleString() + "원";
   }, [props.participationFee]);
@@ -162,7 +162,7 @@ export default function BasicEventItem(props: FullHeightEventItemProps) {
         )}
       </View>
 
-      {props.participationFee !== null && (
+      {participationFeeText !== null && (
         <View style={styles.priceContainer}>
           <Tag size={16} color={StaticColor.gray400} />
           <Text style={styles.priceLabel}>참가비</Text>

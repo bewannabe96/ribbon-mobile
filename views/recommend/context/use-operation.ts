@@ -27,7 +27,7 @@ function mapEventToRecommendEvent(event: Event): RecommendEvent {
     registrationEnd,
     eventStart: DateTime.fromISO(event.period.start),
     eventEnd: DateTime.fromISO(event.period.end),
-    location: event.districts?.join(" ") ?? null,
+    location: event.districts.length === 0 ? null : event.districts.join(" "),
     participationFee: event.participationFee,
     registrationStatus: event.registrationStatus,
   };
