@@ -5,6 +5,7 @@ import {
   View,
   TextInput,
   Keyboard,
+  ActivityIndicator,
 } from "react-native";
 import React, {
   useState,
@@ -24,12 +25,7 @@ import {
 import type { BottomSheetBackdropProps } from "@gorhom/bottom-sheet";
 import Button from "@/components/ui/button";
 import Pill from "@/components/ui/pill";
-import {
-  getLevelOneDistricts,
-  getLevelTwoDistricts,
-  getLevelTwoDistrictsByIds,
-  searchDistricts,
-} from "@/lib/utils/district";
+import { useDistrict } from "@/store";
 import { Check, Search, X } from "lucide-react-native";
 
 type DistrictSearchModalFlowProps = {};
@@ -215,12 +211,18 @@ const searchResultItemStyles = StyleSheet.create({
   },
 });
 
-const LEVEL_ONE_DISTRICTS = getLevelOneDistricts();
-
 function FlowContent(
   props: FlowProps<DistrictSearchModalFlowProps, InputData, OutputData>,
 ) {
   const bottomSheetRef = useRef<BottomSheetModal>(null);
+
+  const {
+    isInitialized,
+    getLevelOneDistricts,
+    getLevelTwoDistricts,
+    getLevelTwoDistrictsByIds,
+    searchDistricts,
+  } = useDistrict();
 
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [selectedDistrictIds, setSelectedDistrictIds] = useState<number[]>([]);
@@ -247,7 +249,6 @@ function FlowContent(
   const handleApply = useCallback(() => {
     Keyboard.dismiss();
     props.close(selectedDistrictIds).then();
-    // getLevelOneDistricts
   }, [selectedDistrictIds, props]);
 
   const handleReset = useCallback(() => {
@@ -267,21 +268,26 @@ function FlowContent(
     [selectedDistrictIds],
   );
 
+  const levelOneDistricts = useMemo(
+    () => getLevelOneDistricts(),
+    [getLevelOneDistricts],
+  );
+
   const searchResults = useMemo(
     () => searchDistricts(searchQuery),
-    [searchQuery],
+    [searchQuery, searchDistricts],
   );
 
   const isSearching = useMemo(() => searchQuery.trim() !== "", [searchQuery]);
 
   const levelTwoDistricts = useMemo(
     () => getLevelTwoDistricts(selectedLevelOne),
-    [selectedLevelOne],
+    [selectedLevelOne, getLevelTwoDistricts],
   );
 
   const selectedDistricts = useMemo(
     () => getLevelTwoDistrictsByIds(selectedDistrictIds),
-    [selectedDistrictIds],
+    [selectedDistrictIds, getLevelTwoDistrictsByIds],
   );
 
   const renderBackdrop = useCallback(
@@ -318,111 +324,122 @@ function FlowContent(
           </TouchableOpacity>
         </View>
 
-        {/* Search Input */}
-        <View style={styles.searchView}>
-          <View style={styles.searchContainer}>
-            <Search color={Color.text} size={20} />
-            <TextInput
-              style={styles.searchInput}
-              placeholder="검색"
-              placeholderTextColor={StaticColor.gray400}
-              // value={searchQuery} //! Cannot set due to `BottomSheetModal` behaviour
-              onChangeText={setSearchQuery}
-            />
-          </View>
-        </View>
-
-        {/* Content */}
-        <View style={styles.bodyView}>
-          {isSearching && (
-            <>
-              <View style={styles.sectionHeader}>
-                <Text style={styles.sectionHeaderText}>
-                  검색 결과 ({searchResults.length})
-                </Text>
-              </View>
-              {searchResults.length > 0 ? (
-                <BottomSheetScrollView>
-                  {searchResults.map((item) => (
-                    <SearchResultItem
-                      key={item.id}
-                      name={item.name}
-                      parentName={item.parentName}
-                      isSelected={selectedDistrictIds.includes(item.id)}
-                      onPress={toggleDistrict.bind(null, item.id)}
-                    />
-                  ))}
-                </BottomSheetScrollView>
-              ) : (
-                <View style={styles.emptyContainer}>
-                  <Text style={styles.emptyText}>검색 결과가 없습니다</Text>
-                  <Text style={styles.emptySubtext}>
-                    다른 검색어를 입력해보세요
-                  </Text>
-                </View>
-              )}
-            </>
-          )}
-
-          {!isSearching && (
-            <View style={styles.splitContainer}>
-              <View style={styles.leftPanel}>
-                <View style={styles.sectionHeader}>
-                  <Text style={styles.sectionHeaderText}>시/도</Text>
-                </View>
-                <BottomSheetScrollView showsVerticalScrollIndicator={false}>
-                  {LEVEL_ONE_DISTRICTS.map(({ id, name }) => (
-                    <LevelOneDistrictItem
-                      key={id}
-                      name={name}
-                      isSelected={selectedLevelOne === id}
-                      onPress={() => setSelectedLevelOne(id)}
-                    />
-                  ))}
-                </BottomSheetScrollView>
-              </View>
-              <View style={styles.rightPanel}>
-                <View style={styles.sectionHeader}>
-                  <Text style={styles.sectionHeaderText}>구/군</Text>
-                </View>
-                <BottomSheetScrollView showsVerticalScrollIndicator={false}>
-                  {levelTwoDistricts.map(({ id, name }) => (
-                    <LevelTwoDistrictItem
-                      key={id}
-                      name={name}
-                      isSelected={selectedDistrictIds.includes(id)}
-                      onPress={toggleDistrict.bind(null, id)}
-                    />
-                  ))}
-                </BottomSheetScrollView>
-              </View>
-            </View>
-          )}
-        </View>
-
-        {/* Selected */}
-        {selectedDistrictIds.length > 0 && (
-          <View style={styles.selectedContainer}>
-            <View style={styles.selectedHeader}>
-              <Text style={styles.selectedHeaderText}>
-                선택된 지역 ({selectedDistrictIds.length})
-              </Text>
-            </View>
-            <View style={styles.selectedPillView}>
-              {selectedDistricts.map(({ id, name }) => (
-                <Pill
-                  key={id}
-                  name={name}
-                  size="sm"
-                  variant="primary"
-                  onPress={toggleDistrict.bind(null, id)}
-                />
-              ))}
-            </View>
+        {!isInitialized && (
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="small" color={Color.text} />
           </View>
         )}
 
-        {/* Footer Buttons */}
+        {isInitialized && (
+          <>
+            {/* Search Input */}
+            <View style={styles.searchView}>
+              <View style={styles.searchContainer}>
+                <Search color={Color.text} size={20} />
+                <TextInput
+                  style={styles.searchInput}
+                  placeholder="검색"
+                  placeholderTextColor={StaticColor.gray400}
+                  // value={searchQuery} //! Cannot set due to `BottomSheetModal` behaviour
+                  onChangeText={setSearchQuery}
+                />
+              </View>
+            </View>
+
+            {/* Content */}
+            <View style={styles.bodyView}>
+              {isSearching && (
+                <>
+                  <View style={styles.sectionHeader}>
+                    <Text style={styles.sectionHeaderText}>
+                      검색 결과 ({searchResults.length})
+                    </Text>
+                  </View>
+                  {searchResults.length > 0 ? (
+                    <BottomSheetScrollView>
+                      {searchResults.map((item) => (
+                        <SearchResultItem
+                          key={item.id}
+                          name={item.name}
+                          parentName={item.parentName}
+                          isSelected={selectedDistrictIds.includes(item.id)}
+                          onPress={toggleDistrict.bind(null, item.id)}
+                        />
+                      ))}
+                    </BottomSheetScrollView>
+                  ) : (
+                    <View style={styles.emptyContainer}>
+                      <Text style={styles.emptyText}>검색 결과가 없습니다</Text>
+                      <Text style={styles.emptySubtext}>
+                        다른 검색어를 입력해보세요
+                      </Text>
+                    </View>
+                  )}
+                </>
+              )}
+
+              {!isSearching && (
+                <View style={styles.splitContainer}>
+                  <View style={styles.leftPanel}>
+                    <View style={styles.sectionHeader}>
+                      <Text style={styles.sectionHeaderText}>시/도</Text>
+                    </View>
+                    <BottomSheetScrollView showsVerticalScrollIndicator={false}>
+                      {levelOneDistricts.map(({ id, name }) => (
+                        <LevelOneDistrictItem
+                          key={id}
+                          name={name}
+                          isSelected={selectedLevelOne === id}
+                          onPress={() => setSelectedLevelOne(id)}
+                        />
+                      ))}
+                    </BottomSheetScrollView>
+                  </View>
+                  <View style={styles.rightPanel}>
+                    <View style={styles.sectionHeader}>
+                      <Text style={styles.sectionHeaderText}>구/군</Text>
+                    </View>
+                    <BottomSheetScrollView showsVerticalScrollIndicator={false}>
+                      {levelTwoDistricts.map(({ id, name }) => (
+                        <LevelTwoDistrictItem
+                          key={id}
+                          name={name}
+                          isSelected={selectedDistrictIds.includes(id)}
+                          onPress={toggleDistrict.bind(null, id)}
+                        />
+                      ))}
+                    </BottomSheetScrollView>
+                  </View>
+                </View>
+              )}
+            </View>
+
+            {/* Selected */}
+            {selectedDistrictIds.length > 0 && (
+              <View style={styles.selectedContainer}>
+                <View style={styles.selectedHeader}>
+                  <Text style={styles.selectedHeaderText}>
+                    선택된 지역 ({selectedDistrictIds.length})
+                  </Text>
+                </View>
+                <View style={styles.selectedPillView}>
+                  {selectedDistricts.map(({ id, name }) => (
+                    <Pill
+                      key={id}
+                      name={name}
+                      size="sm"
+                      variant="primary"
+                      onPress={toggleDistrict.bind(null, id)}
+                    />
+                  ))}
+                </View>
+              </View>
+            )}
+
+            {/* Footer Buttons */}
+          </>
+        )}
+
         <View style={styles.buttonContainer}>
           <Button
             label="초기화"
@@ -466,6 +483,12 @@ const styles = StyleSheet.create({
   contentView: {
     paddingBottom: SizingScale[8],
     height: "100%",
+  },
+
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
 
   modalHeader: {

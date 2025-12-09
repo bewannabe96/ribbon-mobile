@@ -1,5 +1,11 @@
-import { ScrollView, StyleSheet, View, Text } from "react-native";
-import React, { useCallback, useRef, useMemo } from "react";
+import {
+  ScrollView,
+  StyleSheet,
+  View,
+  Text,
+  ActivityIndicator,
+} from "react-native";
+import React, { useCallback, useRef, useMemo, useEffect } from "react";
 import { Color, Sizing, SizingScale } from "@/constants/theme";
 import {
   SelectionModalFlow,
@@ -20,7 +26,7 @@ import {
   DistrictSearchModalFlow,
   DistrictSearchModalFlowRef,
 } from "@/components/district-search-modal-flow";
-import { getLevelTwoDistrictsByIds } from "@/lib/utils/district";
+import { useDistrict } from "@/store";
 
 const FEE_OPTIONS: OptionItem[] = [
   { label: "무료", value: "free" },
@@ -99,6 +105,7 @@ function getTargetOptionItemsFromFilter(filter: SearchFilter): OptionItem[] {
 
 export default function SubSearchFilters() {
   const { filter, dispatchFilter } = useSearchFilters();
+  const { isInitialized, getLevelTwoDistrictsByIds } = useDistrict();
 
   const districtModalRef = useRef<DistrictSearchModalFlowRef>(null);
   const feeModalRef = useRef<SelectionModalFlowRef>(null);
@@ -108,7 +115,7 @@ export default function SubSearchFilters() {
 
   const selectedDistricts = useMemo(
     () => getLevelTwoDistrictsByIds(filter.districts),
-    [filter],
+    [filter.districts, getLevelTwoDistrictsByIds],
   );
 
   const selectedFee = useMemo(() => {
@@ -250,6 +257,14 @@ export default function SubSearchFilters() {
   // const themeBackground = useThemeColor("background");
   // const themeBorder = useThemeColor("border");
 
+  if (!isInitialized) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="small" color={Color.text} />
+      </View>
+    );
+  }
+
   return (
     <View>
       <ScrollView
@@ -377,6 +392,14 @@ export default function SubSearchFilters() {
 }
 
 const styles = StyleSheet.create({
+  loadingContainer: {
+    paddingVertical: SizingScale[4],
+    alignItems: "center",
+    borderBottomWidth: 1,
+    borderColor: Color.border,
+    backgroundColor: Color.background,
+  },
+
   scrollView: {
     flexGrow: 0,
     borderBottomWidth: 1,
