@@ -7,6 +7,7 @@ import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 import { AuthProvider } from "@/contexts/AuthContext";
 import ToastManager from "toastify-react-native";
 import SimpleToast from "@/components/ui/toast/simple";
+import LoadingOverlay from "@/components/ui/loading-overlay";
 
 export default function GlobalLayout() {
   return (
@@ -27,6 +28,7 @@ export default function GlobalLayout() {
         animationStyle="fade"
         duration={1500}
       />
+      <LoadingOverlay />
     </AuthProvider>
   );
 }

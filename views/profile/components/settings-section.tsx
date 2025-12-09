@@ -12,9 +12,11 @@ import { ChevronRight } from "lucide-react-native";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCallback } from "react";
 import * as WebBrowser from "expo-web-browser";
+import { useLoadingStore } from "@/store";
 
 export default function SettingsSection() {
   const { isSignedIn, signOut } = useAuth();
+  const { show, hide } = useLoadingStore();
 
   const onTermsOfServicePressed = useCallback(async () => {
     const url = process.env.EXPO_PUBLIC_TERMS_OF_SERVICE_URL;
@@ -36,12 +38,23 @@ export default function SettingsSection() {
     if (url) await Linking.openURL(url);
   }, []);
 
-  const onSignOut = useCallback(() => {
-    Alert.alert("로그아웃", "정말로 로그아웃 하시겠습니까?", [
-      { text: "취소", style: "cancel" },
-      { text: "확인", onPress: signOut },
-    ]);
-  }, [signOut]);
+  const onSignOut = useCallback(async () => {
+    const confirmed = await new Promise((resolve) =>
+      Alert.alert("로그아웃", "정말로 로그아웃 하시겠습니까?", [
+        { text: "취소", style: "cancel", onPress: resolve.bind(null, false) },
+        { text: "확인", onPress: resolve.bind(null, true) },
+      ]),
+    );
+
+    if (!confirmed) return;
+
+    try {
+      show();
+      await signOut();
+    } finally {
+      hide();
+    }
+  }, [hide, show, signOut]);
 
   return (
     <Section>

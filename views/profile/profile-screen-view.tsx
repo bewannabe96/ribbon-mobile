@@ -15,22 +15,39 @@ import SettingsSection from "./components/settings-section";
 import { useScreenEffect } from "./context/use-screen-effect";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCallback } from "react";
+import { useLoadingStore } from "@/store";
 
 export default function ProfileScreenView() {
   useScreenEffect();
 
+  const { show, hide } = useLoadingStore();
   const { isSignedIn, deleteAccount } = useAuth();
 
-  const onDeleteAccount = useCallback(() => {
-    Alert.alert(
-      "회원탈퇴",
-      "정말로 탈퇴하시겠습니까?\n\n모든 데이터가 영구적으로 삭제되며, 이 작업은 되돌릴 수 없습니다.",
-      [
-        { text: "취소", style: "cancel" },
-        { text: "탈퇴하기", style: "destructive", onPress: deleteAccount },
-      ],
+  const onDeleteAccount = useCallback(async () => {
+    const confirmed = await new Promise((resolve) =>
+      Alert.alert(
+        "회원탈퇴",
+        "정말로 탈퇴하시겠습니까?\n\n모든 데이터가 영구적으로 삭제되며, 이 작업은 되돌릴 수 없습니다.",
+        [
+          { text: "취소", style: "cancel", onPress: resolve.bind(null, false) },
+          {
+            text: "탈퇴하기",
+            style: "destructive",
+            onPress: resolve.bind(null, true),
+          },
+        ],
+      ),
     );
-  }, [deleteAccount]);
+
+    if (!confirmed) return;
+
+    try {
+      show();
+      await deleteAccount();
+    } finally {
+      hide();
+    }
+  }, [deleteAccount, hide, show]);
 
   return (
     <View style={styles.container}>
