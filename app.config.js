@@ -15,7 +15,7 @@ module.exports = {
         ITSAppUsesNonExemptEncryption: false,
       },
       usesAppleSignIn: true,
-      buildNumber: "25120802",
+      buildNumber: "25120901",
     },
     android: {
       adaptiveIcon: {
@@ -26,7 +26,7 @@ module.exports = {
       },
       edgeToEdgeEnabled: true,
       package: "dev.b1ob.ribbon",
-      versionCode: "25120802",
+      versionCode: "25120901",
     },
     plugins: [
       [

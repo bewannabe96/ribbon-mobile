@@ -103,33 +103,15 @@ export default function SignInScreenView() {
         <Text style={styles.logoText}>리본</Text>
         <Text style={styles.sloganText}>인생의 모든 순간을 즐겁게</Text>
         <View style={styles.buttonView}>
-          {/*<TouchableOpacity*/}
-          {/*  style={[*/}
-          {/*    styles.buttonBasic,*/}
-          {/*    {*/}
-          {/*      backgroundColor: PROVIDER_COLOR.naver.background,*/}
-          {/*      opacity: loading ? 0.5 : 1,*/}
-          {/*    },*/}
-          {/*  ]}*/}
-          {/*  disabled={loading}*/}
-          {/*  activeOpacity={0.6}*/}
+          {/* TODO: Temp */}
+          {/*<SignInButton*/}
+          {/*  title="네이버로 시작하기"*/}
+          {/*  iconImageSource={require("@/assets/logo/naver.svg")}*/}
           {/*  onPress={handleSignin.bind(null, "naver")}*/}
-          {/*>*/}
-          {/*  <Image*/}
-          {/*    source={require("@/assets/logo/naver.svg")}*/}
-          {/*    style={styles.buttonIcon}*/}
-          {/*    contentFit="contain"*/}
-          {/*    tintColor={PROVIDER_COLOR.naver.text}*/}
-          {/*  />*/}
-          {/*  <Text*/}
-          {/*    style={[*/}
-          {/*      styles.buttonTextBasic,*/}
-          {/*      { color: PROVIDER_COLOR.naver.text },*/}
-          {/*    ]}*/}
-          {/*  >*/}
-          {/*    네이버로 시작하기*/}
-          {/*  </Text>*/}
-          {/*</TouchableOpacity>*/}
+          {/*  backgroundColor={PROVIDER_COLOR.naver.background}*/}
+          {/*  textColor={PROVIDER_COLOR.naver.text}*/}
+          {/*  isLoading={loading}*/}
+          {/*/>*/}
           <SignInButton
             title="카카오로 시작하기"
             iconImageSource={require("@/assets/logo/kakao.svg")}
