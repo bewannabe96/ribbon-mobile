@@ -1,24 +1,34 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { Stack } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
-import 'react-native-reanimated';
+import "react-native-reanimated";
 
-import { useColorScheme } from '@/hooks/use-color-scheme';
+import { Stack } from "expo-router";
+import { StatusBar } from "expo-status-bar";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
+import { AuthProvider } from "@/contexts/AuthContext";
+import ToastManager from "toastify-react-native";
+import SimpleToast from "@/components/ui/toast/simple";
+import LoadingOverlay from "@/components/ui/loading-overlay";
 
-export const unstable_settings = {
-  anchor: '(tabs)',
-};
-
-export default function RootLayout() {
-  const colorScheme = useColorScheme();
-
+export default function GlobalLayout() {
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
-      </Stack>
-      <StatusBar style="auto" />
-    </ThemeProvider>
+    <AuthProvider>
+      <GestureHandlerRootView>
+        <BottomSheetModalProvider>
+          <StatusBar style="dark" />
+          <Stack screenOptions={{ headerShown: false }} />
+        </BottomSheetModalProvider>
+      </GestureHandlerRootView>
+      <ToastManager
+        config={{ simple: (props: any) => <SimpleToast {...props} /> }}
+        position="bottom"
+        bottomOffset={100}
+        showProgressBar={false}
+        showCloseIcon={false}
+        useModal={false}
+        animationStyle="fade"
+        duration={1500}
+      />
+      <LoadingOverlay />
+    </AuthProvider>
   );
 }
